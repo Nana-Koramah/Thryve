@@ -32,3 +32,8 @@ Database: PostgreSQL via Supabase
 Real-time: Supabase Realtime (WebSockets)
 
 Voice/AI: WebRTC for browser-based recording + OpenAI API for sentiment analysis
+
+#### Figma Designs
+https://www.figma.com/design/0x3eVfOzYTzqDmy4yiiBB6/Untitled?node-id=0-1&t=xA6btFXPMnsOIZlh-1 
+#### UML Diagrams
+
