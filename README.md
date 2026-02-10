@@ -36,3 +36,5 @@ Voice/AI: WebRTC for browser-based recording + OpenAI API for sentiment analysis
 #### Figma Designs
 https://www.figma.com/design/0x3eVfOzYTzqDmy4yiiBB6/Untitled?node-id=0-1&t=xA6btFXPMnsOIZlh-1 
 
+#### Figma designs walkthrough
+https://drive.google.com/drive/folders/1vcMV3EkcKF6X9ZW-gijzU6eCLTcFM7zt?usp=drive_link 
