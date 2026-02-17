@@ -25,11 +25,11 @@ Frontend: Next.js (PWA for Mothers), React.js (Clinician Dashboard)
 
 Styling: Tailwind CSS (Theme: Baby Pink, Baby Blue, & White)
 
-Backend: Node.js / Supabase Edge Functions
+Backend: Node.js / Firebase Edge Functions
 
-Database: PostgreSQL via Supabase
+Database: Firebase
 
-Real-time: Supabase Realtime (WebSockets)
+Real-time: WebSockets
 
 Voice/AI: WebRTC for browser-based recording + OpenAI API for sentiment analysis
 
