@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'sign_in_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,11 +14,11 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     // Start a 3-second timer to transition to the next screen
-    Timer(const Duration(seconds: 3), () {
+    Timer(const Duration(seconds: 10), () {
       // Replace with your Onboarding or Login Screen later
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const PlaceholderHomeScreen()),
+        MaterialPageRoute(builder: (context) => const SignInScreen()),
       );
     });
   }
@@ -45,17 +46,6 @@ class _SplashScreenState extends State<SplashScreen> {
           ],
         ),
       ),
-    );
-  }
-}
-
-// Temporary placeholder for the next screen
-class PlaceholderHomeScreen extends StatelessWidget {
-  const PlaceholderHomeScreen({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text("Onboarding Screen Starts Here")),
     );
   }
 }

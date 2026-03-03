@@ -18,7 +18,7 @@ class ThryveApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF89CFF0), // Baby Blue
           primary: const Color(0xFF89CFF0), // Baby Blue primary
-          secondary: const Color(0xFFF4C2C2), // Baby Pink secondary
+          secondary: const Color(0xFFF25A8C), // Brand Pink secondary
           surface: Colors.white, // Pure White background
         ),
       ),
