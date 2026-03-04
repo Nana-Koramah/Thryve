@@ -16,12 +16,10 @@ class _SplashScreenState extends State<SplashScreen> {
     // Start the timer after the first frame so the
     // splash is visibly shown for the full duration.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Timer(const Duration(seconds: 3), () {
+      Timer(const Duration(seconds: 5), () {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (context) => const SignInScreen(),
-          ),
+          MaterialPageRoute(builder: (context) => const SignInScreen()),
         );
       });
     });
@@ -32,7 +30,7 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF9A8D4),
       body: Center(
-        child: Image.asset('assets/images/thryve_logo.png', width: 140),
+        child: Image.asset('assets/images/thryve_logo.png', width: 160),
       ),
     );
   }

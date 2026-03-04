@@ -668,15 +668,43 @@ class _ActionCard extends StatelessWidget {
   }
 }
 
-class _MoodCard extends StatelessWidget {
+class _MoodCard extends StatefulWidget {
   const _MoodCard({required this.colorScheme});
 
   final ColorScheme colorScheme;
 
   @override
+  State<_MoodCard> createState() => _MoodCardState();
+}
+
+class _MoodCardState extends State<_MoodCard> {
+  final List<double> _baseBars = [0.4, 0.7, 0.9, 0.6, 0.8, 0.5, 0.7];
+  final List<String> _labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  String _selectedMood = 'Calm';
+  late List<double> _currentBars = List<double>.from(_baseBars);
+
+  void _onMoodSelected(String mood) {
+    setState(() {
+      _selectedMood = mood;
+      switch (mood) {
+        case 'Happy':
+          _currentBars = [0.7, 0.8, 0.9, 0.85, 0.9, 0.75, 0.8];
+          break;
+        case 'Sad':
+          _currentBars = [0.3, 0.4, 0.35, 0.3, 0.45, 0.4, 0.35];
+          break;
+        case 'Anxious':
+          _currentBars = [0.5, 0.6, 0.4, 0.7, 0.5, 0.65, 0.55];
+          break;
+        default:
+          _currentBars = List<double>.from(_baseBars);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final bars = [0.4, 0.7, 0.9, 0.6, 0.8, 0.5, 0.7];
-    final labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    final colorScheme = widget.colorScheme;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -705,9 +733,12 @@ class _MoodCard extends StatelessWidget {
                     style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    'Radiant & Calm',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                  Text(
+                    _selectedMood,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ],
               ),
@@ -725,19 +756,49 @@ class _MoodCard extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _MoodEmojiChip(
+                emoji: '😊',
+                label: 'Happy',
+                isSelected: _selectedMood == 'Happy',
+                onTap: () => _onMoodSelected('Happy'),
+              ),
+              _MoodEmojiChip(
+                emoji: '😔',
+                label: 'Sad',
+                isSelected: _selectedMood == 'Sad',
+                onTap: () => _onMoodSelected('Sad'),
+              ),
+              _MoodEmojiChip(
+                emoji: '😰',
+                label: 'Anxious',
+                isSelected: _selectedMood == 'Anxious',
+                onTap: () => _onMoodSelected('Anxious'),
+              ),
+              _MoodEmojiChip(
+                emoji: '😌',
+                label: 'Calm',
+                isSelected: _selectedMood == 'Calm',
+                onTap: () => _onMoodSelected('Calm'),
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
           SizedBox(
             height: 80,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: List.generate(bars.length, (index) {
+              children: List.generate(_currentBars.length, (index) {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Container(
                       width: 12,
-                      height: 60 * bars[index],
+                      height: 60 * _currentBars[index],
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(6),
                         gradient: LinearGradient(
@@ -752,7 +813,7 @@ class _MoodCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      labels[index],
+                      _labels[index],
                       style: TextStyle(
                         fontSize: 11,
                         color: Colors.grey.shade600,
@@ -763,26 +824,48 @@ class _MoodCard extends StatelessWidget {
               }),
             ),
           ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: () {
-                showAppToast('Mood check-in coming soon.');
-              },
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: colorScheme.secondary),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-              child: Text(
-                'Check-in with Mood Pulse',
-                style: TextStyle(
-                  color: colorScheme.secondary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MoodEmojiChip extends StatelessWidget {
+  const _MoodEmojiChip({
+    required this.emoji,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String emoji;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: isSelected ? const Color(0xFFFFE5F0) : Colors.grey.shade100,
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              emoji,
+              style: const TextStyle(fontSize: 20),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              color: isSelected ? Colors.black : Colors.grey.shade600,
             ),
           ),
         ],
