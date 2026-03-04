@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 
 import 'api_service.dart';
 import 'signup_step_one.dart';
+import 'facility_linkage_screen.dart';
+import 'widgets/app_toast.dart';
 
 class SignUpStepTwoScreen extends StatefulWidget {
   final SignUpData signUpData;
@@ -35,7 +37,9 @@ class _SignUpStepTwoScreenState extends State<SignUpStepTwoScreen> {
   Future<void> _onScanCard() async {
     try {
       final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(source: ImageSource.camera);
+      final pickedFile = await picker.pickImage(
+        source: ImageSource.camera,
+      );
 
       if (pickedFile == null) return;
 
@@ -43,11 +47,7 @@ class _SignUpStepTwoScreenState extends State<SignUpStepTwoScreen> {
         _ghanaCardImage = File(pickedFile.path);
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Unable to open camera. Please try again.'),
-        ),
-      );
+      showAppToast('Unable to open camera. Please try again.');
     }
   }
 
@@ -70,24 +70,19 @@ class _SignUpStepTwoScreenState extends State<SignUpStepTwoScreen> {
       );
 
       if (!mounted) return;
+      showAppToast('Sign up successful. Let’s link your facility next.');
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Sign up successful')));
-
-      // TODO: Navigate to your main/home screen after successful registration.
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.message)));
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Something went wrong. Please try again.'),
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => const FacilityLinkageScreen(),
         ),
       );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      showAppToast(e.message);
+    } catch (_) {
+      if (!mounted) return;
+      showAppToast('Something went wrong. Please try again.');
     } finally {
       if (mounted) {
         setState(() {
@@ -146,9 +141,8 @@ class _SignUpStepTwoScreenState extends State<SignUpStepTwoScreen> {
                   value: 1.0,
                   minHeight: 4,
                   backgroundColor: Colors.grey.shade200,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    colorScheme.primary,
-                  ),
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(colorScheme.primary),
                 ),
               ),
               const SizedBox(height: 24),
@@ -162,7 +156,10 @@ class _SignUpStepTwoScreenState extends State<SignUpStepTwoScreen> {
               const SizedBox(height: 8),
               Text(
                 'We use your Ghana Card and body measurements to keep your care personalised and secure.',
-                style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade700,
+                ),
               ),
               const SizedBox(height: 24),
               Expanded(
@@ -185,7 +182,9 @@ class _SignUpStepTwoScreenState extends State<SignUpStepTwoScreen> {
                             Expanded(
                               child: TextFormField(
                                 controller: _ghanaCardController,
-                                decoration: _fieldDecoration('GHA-000000000-0'),
+                                decoration: _fieldDecoration(
+                                  'GHA-000000000-0',
+                                ),
                                 validator: (value) {
                                   if (value == null || value.trim().isEmpty) {
                                     return 'Please enter your Ghana Card ID';
@@ -210,7 +209,8 @@ class _SignUpStepTwoScreenState extends State<SignUpStepTwoScreen> {
                                         color: colorScheme.primary,
                                       )
                                     : ClipRRect(
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius:
+                                            BorderRadius.circular(12),
                                         child: Image.file(
                                           _ghanaCardImage!,
                                           width: 32,
@@ -253,9 +253,8 @@ class _SignUpStepTwoScreenState extends State<SignUpStepTwoScreen> {
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _heightController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
+                          keyboardType:
+                              const TextInputType.numberWithOptions(decimal: true),
                           decoration: _fieldDecoration('Enter your height'),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
@@ -275,9 +274,8 @@ class _SignUpStepTwoScreenState extends State<SignUpStepTwoScreen> {
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _weightController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
+                          keyboardType:
+                              const TextInputType.numberWithOptions(decimal: true),
                           decoration: _fieldDecoration('Enter your weight'),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
@@ -297,7 +295,9 @@ class _SignUpStepTwoScreenState extends State<SignUpStepTwoScreen> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(24),
                               ),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 14,
+                              ),
                             ),
                             child: _isSubmitting
                                 ? const SizedBox(
@@ -305,7 +305,8 @@ class _SignUpStepTwoScreenState extends State<SignUpStepTwoScreen> {
                                     width: 20,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                      valueColor:
+                                          AlwaysStoppedAnimation<Color>(
                                         Colors.white,
                                       ),
                                     ),
@@ -332,3 +333,4 @@ class _SignUpStepTwoScreenState extends State<SignUpStepTwoScreen> {
     );
   }
 }
+

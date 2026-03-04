@@ -1,18 +1,68 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
+import 'mother_profile.dart';
+import 'edit_profile_screen.dart';
+import 'widgets/app_toast.dart';
+import 'smart_plate_screen.dart';
+import 'check_in_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  const DashboardScreen({super.key, this.initialIndex = 0});
+
+  final int initialIndex;
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
+  MotherProfile _motherProfile = const MotherProfile(
+    fullName: 'Abena',
+    email: 'abena@example.com',
+    phoneNumber: '+233 24 123 4567',
+    ghanaCardId: 'GHA-123456789-0',
+    linkedHospitalName: 'Korle-Bu Teaching Hospital',
+    primaryLanguage: 'Twi',
+    dateOfBirth: '12th June 1995',
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   void _onNavTap(int index) {
+    if (index == 1) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => const CheckInScreen(),
+        ),
+      );
+      return;
+    }
+
+    if (index == 2) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => const SmartPlateScreen(),
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _selectedIndex = index;
+    });
+  }
+
+  void _onProfileUpdated(MotherProfile updatedProfile) {
+    setState(() {
+      _motherProfile = updatedProfile;
     });
   }
 
@@ -21,6 +71,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFF9A8D4),
+        elevation: 0,
+        centerTitle: false,
+        automaticallyImplyLeading: false,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/images/thryve_logo.png',
+              height: 28,
+            ),
+          ],
+        ),
+      ),
       backgroundColor: const Color(0xFFF8F9FF),
       body: SafeArea(
         child: IndexedStack(
@@ -29,7 +94,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             _HomeTab(colorScheme: colorScheme),
             const _PlaceholderTab(title: 'Check-in'),
             const _PlaceholderTab(title: 'Meals'),
-            const _PlaceholderTab(title: 'Profile'),
+            _ProfileTab(
+              profile: _motherProfile,
+              onProfileUpdated: _onProfileUpdated,
+            ),
           ],
         ),
       ),
@@ -91,9 +159,9 @@ class _HomeTab extends StatelessWidget {
             colorScheme: colorScheme,
             imageAsset: 'assets/images/postnatal_checkin.png',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Postnatal check-in flow coming soon'),
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const CheckInScreen(),
                 ),
               );
             },
@@ -107,8 +175,10 @@ class _HomeTab extends StatelessWidget {
             colorScheme: colorScheme,
             imageAsset: 'assets/images/meal_log.jpg',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Meal logging flow coming soon')),
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const SmartPlateScreen(),
+                ),
               );
             },
           ),
@@ -156,6 +226,358 @@ class _HomeTab extends StatelessWidget {
           _HealthTipCard(colorScheme: colorScheme),
         ],
       ),
+    );
+  }
+}
+
+class _ProfileTab extends StatelessWidget {
+  const _ProfileTab({
+    required this.profile,
+    required this.onProfileUpdated,
+  });
+
+  final MotherProfile profile;
+  final ValueChanged<MotherProfile> onProfileUpdated;
+
+  Future<void> _onChangePhoto(BuildContext context) async {
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(source: ImageSource.gallery);
+      if (picked == null) return;
+
+      final updated = profile.copyWith(profilePhotoPath: picked.path);
+      onProfileUpdated(updated);
+      showAppToast('Profile photo updated.');
+    } catch (_) {
+      showAppToast('Unable to update profile photo. Please try again.');
+    }
+  }
+
+  Future<void> _onEditProfile(BuildContext context) async {
+    final updatedProfile = await Navigator.of(context).push<MotherProfile>(
+      MaterialPageRoute(
+        builder: (_) => EditProfileScreen(profile: profile),
+      ),
+    );
+
+    if (updatedProfile != null) {
+      onProfileUpdated(updatedProfile);
+      showAppToast('Profile updated successfully.');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Column(
+              children: [
+                Stack(
+                  children: [
+                    _ProfileAvatar(profile: profile),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: () => _onChangePhoto(context),
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.camera_alt_rounded,
+                            size: 16,
+                            color: colorScheme.secondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  profile.fullName,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    profile.ghanaCardId,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Personal Info',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.grey.shade900,
+                ),
+              ),
+              Text(
+                'Private',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                _ProfileInfoRow(
+                  icon: Icons.cake_rounded,
+                  label: 'Date of birth',
+                  value: profile.dateOfBirth,
+                ),
+                const SizedBox(height: 12),
+                _ProfileInfoRow(
+                  icon: Icons.phone_rounded,
+                  label: 'Phone Number',
+                  value: profile.phoneNumber,
+                ),
+                const SizedBox(height: 12),
+                _ProfileInfoRow(
+                  icon: Icons.email_rounded,
+                  label: 'Email',
+                  value: profile.email,
+                ),
+                const SizedBox(height: 12),
+                _ProfileInfoRow(
+                  icon: Icons.language_rounded,
+                  label: 'Primary Language',
+                  value: profile.primaryLanguage,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Clinical Info',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: Colors.grey.shade900,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                _ProfileInfoRow(
+                  icon: Icons.local_hospital_rounded,
+                  label: 'Linked Facility',
+                  value: profile.linkedHospitalName,
+                ),
+                const SizedBox(height: 12),
+                _ProfileInfoRow(
+                  icon: Icons.info_outline_rounded,
+                  label: 'Status',
+                  value: 'Postnatal Phase',
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => _onEditProfile(context),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      color: colorScheme.secondary,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: Text(
+                    'Edit Profile',
+                    style: TextStyle(
+                      color: colorScheme.secondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    showAppToast('Health record updates coming soon.');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.secondary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: const Text(
+                    'Update Health Record',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileAvatar extends StatelessWidget {
+  const _ProfileAvatar({required this.profile});
+
+  final MotherProfile profile;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasPhoto = profile.profilePhotoPath != null &&
+        profile.profilePhotoPath!.isNotEmpty;
+
+    if (hasPhoto) {
+      return CircleAvatar(
+        radius: 40,
+        backgroundImage: FileImage(File(profile.profilePhotoPath!)),
+      );
+    }
+
+    return CircleAvatar(
+      radius: 40,
+      backgroundColor: const Color(0xFFFFE5F0),
+      child: Text(
+        profile.fullName.isNotEmpty ? profile.fullName[0] : '?',
+        style: const TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileInfoRow extends StatelessWidget {
+  const _ProfileInfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.blue.shade50,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            icon,
+            size: 18,
+            color: Colors.blue.shade600,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -346,9 +768,7 @@ class _MoodCard extends StatelessWidget {
             width: double.infinity,
             child: OutlinedButton(
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Mood check-in coming soon')),
-                );
+                showAppToast('Mood check-in coming soon.');
               },
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: colorScheme.secondary),

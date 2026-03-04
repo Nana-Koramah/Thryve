@@ -29,6 +29,14 @@ class ApiService {
     required String weightKg,
     File? ghanaCardImage,
   }) async {
+    // Temporary: short‑circuit the network call while there is
+    // no real backend configured. This keeps sign up flowing
+    // smoothly in development.
+    if (_baseUrl == 'https://your-api-base-url.com') {
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      return;
+    }
+
     final uri = Uri.parse('$_baseUrl/signup');
 
     http.Response response;
@@ -66,7 +74,10 @@ class ApiService {
     }
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw ApiException('Failed to register. Status: ${response.statusCode}');
+      throw ApiException(
+        'Failed to register. Status: ${response.statusCode}',
+      );
     }
   }
 }
+
