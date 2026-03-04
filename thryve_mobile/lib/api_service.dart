@@ -66,10 +66,7 @@ class ApiService {
     }
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw ApiException(
-        'Failed to register. Status: ${response.statusCode}',
-      );
+      throw ApiException('Failed to register. Status: ${response.statusCode}');
     }
   }
 }
-
