@@ -1,0 +1,945 @@
+.tsa-root {
+  min-height: 100vh;
+  background-color: #f3f5fb;
+  color: #111827;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+}
+
+.tsa-topbar {
+  height: 56px;
+  padding: 0 24px;
+  background-color: #0f172a;
+  color: #f9fafb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tsa-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.tsa-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.tsa-logo-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #2563eb, #38bdf8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.tsa-logo-text {
+  font-size: 16px;
+}
+
+.tsa-logo-image {
+  height: 24px;
+  display: block;
+}
+
+.tsa-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tsa-nav-item {
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.tsa-nav-item--active {
+  background-color: #111827;
+  color: #f9fafb;
+}
+
+.tsa-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.tsa-search input {
+  width: 260px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  font-size: 13px;
+}
+
+.tsa-topbar-icons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tsa-icon-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: none;
+  background-color: #111827;
+  color: #f9fafb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.tsa-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background-color: #2563eb;
+  color: #f9fafb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.tsa-main {
+  max-width: 1240px;
+  margin: 24px auto 40px;
+  padding: 0 24px 32px;
+  display: grid;
+  grid-template-columns: minmax(0, 2.1fr) minmax(0, 1fr);
+  gap: 20px;
+}
+
+.tsa-main-left,
+.tsa-main-right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tsa-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.tsa-page-title {
+  font-size: 22px;
+  margin: 0;
+}
+
+.tsa-page-subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.tsa-system-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background-color: #ecfdf3;
+  color: #166534;
+  font-size: 12px;
+}
+
+.tsa-system-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background-color: #22c55e;
+}
+
+.tsa-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.tsa-metric-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+.tsa-metric-label {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.tsa-metric-value {
+  font-size: 22px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.tsa-metric-caption {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.tsa-metric-caption--negative {
+  color: #b91c1c;
+}
+
+.tsa-metric-caption--positive {
+  color: #15803d;
+}
+
+.tsa-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.tsa-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.tsa-card-header--space-between {
+  margin-bottom: 16px;
+}
+
+.tsa-card-header h2,
+.tsa-card-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.tsa-card-header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.tsa-secondary-button {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.tsa-secondary-button--full {
+  width: 100%;
+  justify-content: center;
+}
+
+.tsa-table {
+  margin-top: 4px;
+}
+
+.tsa-table-header {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 2.2fr 0.8fr 0.8fr;
+  gap: 8px;
+  padding: 8px 0;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.tsa-table-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 2.2fr 0.8fr 0.8fr;
+  gap: 8px;
+  padding: 10px 0;
+  border-top: 1px solid #e5e7eb;
+  font-size: 13px;
+  align-items: center;
+}
+
+.tsa-patient-name {
+  font-weight: 600;
+}
+
+.tsa-patient-id {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.tsa-patient-summary {
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.tsa-patient-time {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.tsa-row-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.tsa-icon-chip {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.tsa-table-footer {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.tsa-link-button {
+  border: none;
+  background: none;
+  color: #2563eb;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.tsa-pill {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tsa-pill--urgent {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.tsa-pill--ppd {
+  background-color: #fef3c7;
+  color: #c05621;
+}
+
+.tsa-pill--stable {
+  background-color: #ecfdf3;
+  color: #166534;
+}
+
+.tsa-main-right .tsa-card {
+  padding: 16px;
+}
+
+.tsa-live-pill {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background-color: #fee2e2;
+  color: #b91c1c;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tsa-alert-card {
+  border-radius: 14px;
+  padding: 14px 14px 12px;
+  margin-bottom: 10px;
+}
+
+.tsa-alert-card--primary {
+  background: linear-gradient(135deg, #ef4444, #fb7185);
+  color: #fef2f2;
+}
+
+.tsa-alert-card--secondary {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+
+.tsa-alert-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.tsa-alert-title {
+  font-weight: 700;
+}
+
+.tsa-alert-subtitle {
+  font-size: 12px;
+  color: #e5e7eb;
+}
+
+.tsa-alert-card--secondary .tsa-alert-subtitle {
+  color: #6b7280;
+}
+
+.tsa-alert-timer {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.tsa-alert-body {
+  font-size: 12px;
+  margin: 4px 0 10px;
+}
+
+.tsa-primary-button {
+  width: 100%;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 0;
+  background-color: #fef9c3;
+  color: #7c2d12;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tsa-map-card {
+  margin-top: 12px;
+}
+
+.tsa-map-placeholder {
+  height: 120px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #dbeafe, #f9fafb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #374151;
+}
+
+/* Escalation page refinements */
+.tsa-main--escalation {
+  grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.2fr);
+  align-items: flex-start;
+}
+
+.tsa-escalation-left,
+.tsa-escalation-right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tsa-escalation-metrics {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.tsa-escalation-metric {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 8px 12px;
+  min-width: 160px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.tsa-escalation-table-card {
+  margin-top: 8px;
+}
+
+.tsa-escalation-table {
+  margin-top: 4px;
+}
+
+.tsa-escalation-header-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1.6fr 1fr 1fr 0.8fr;
+  gap: 8px;
+  padding: 8px 4px;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.tsa-escalation-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1.6fr 1fr 1fr 0.8fr;
+  gap: 8px;
+  padding: 10px 4px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 13px;
+  align-items: center;
+}
+
+.tsa-escalation-right .tsa-reroute-card,
+.tsa-escalation-right .tsa-escalation-map-card {
+  padding: 16px 18px;
+}
+
+.tsa-reroute-details {
+  margin-top: 4px;
+  margin-bottom: 12px;
+}
+
+.tsa-reroute-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.tsa-reroute-label {
+  color: #6b7280;
+}
+
+.tsa-reroute-value {
+  font-weight: 500;
+}
+
+.tsa-reroute-value--critical {
+  color: #b91c1c;
+}
+
+.tsa-reroute-recommend {
+  margin-top: 8px;
+}
+
+.tsa-reroute-actions {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tsa-reroute-option {
+  padding: 12px 12px 10px;
+}
+
+.tsa-reroute-option-header {
+  font-size: 11px;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+
+.tsa-reroute-option-body {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tsa-reroute-option-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background-color: #2563eb;
+  color: #f9fafb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.tsa-reroute-option-title {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.tsa-reroute-option-sub {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.tsa-primary-button--full {
+  width: 100%;
+}
+
+.tsa-reroute-notify {
+  margin-top: 8px;
+}
+
+.tsa-escalated-pill {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background-color: #fee2e2;
+  color: #b91c1c;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tsa-escalation-map-card {
+  margin-top: 12px;
+}
+
+@media (max-width: 960px) {
+  .tsa-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Red flag detail page */
+.tsa-main--detail {
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.9fr) minmax(0, 1.2fr);
+  align-items: flex-start;
+  row-gap: 20px;
+}
+
+.tsa-detail-left,
+.tsa-detail-center,
+.tsa-detail-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tsa-detail-card {
+  position: relative;
+}
+
+.tsa-detail-back {
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.tsa-detail-header-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.tsa-detail-label {
+  font-size: 11px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tsa-detail-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.tsa-detail-pill {
+  display: inline-flex;
+  margin-top: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tsa-detail-pill--priority {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.tsa-detail-meta {
+  text-align: right;
+  font-size: 11px;
+}
+
+.tsa-detail-meta-label {
+  color: #6b7280;
+}
+
+.tsa-detail-meta-value {
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.tsa-detail-meta-sub {
+  margin-top: 2px;
+  color: #6b7280;
+}
+
+.tsa-detail-section-heading {
+  margin-top: 4px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.tsa-symptom-bar {
+  margin-bottom: 10px;
+}
+
+.tsa-symptom-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.tsa-symptom-value {
+  font-weight: 600;
+}
+
+.tsa-symptom-value--severe {
+  color: #b91c1c;
+}
+
+.tsa-symptom-track {
+  height: 6px;
+  border-radius: 999px;
+  background-color: #e5e7eb;
+  overflow: hidden;
+}
+
+.tsa-symptom-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.tsa-symptom-fill--fever {
+  width: 80%;
+  background: linear-gradient(90deg, #f97316, #ef4444);
+}
+
+.tsa-symptom-fill--bleeding {
+  width: 95%;
+  background: linear-gradient(90deg, #b91c1c, #fb7185);
+}
+
+.tsa-symptom-fill--bp {
+  width: 70%;
+  background: linear-gradient(90deg, #22c55e, #facc15);
+}
+
+.tsa-detail-subsection {
+  margin-top: 12px;
+}
+
+.tsa-detail-subsection-title {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.tsa-detail-history-list {
+  margin: 0;
+  padding: 0;
+}
+
+.tsa-detail-history-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.tsa-detail-history-item dt {
+  color: #6b7280;
+}
+
+.tsa-detail-history-item dd {
+  margin: 0;
+  font-weight: 500;
+}
+
+.tsa-detail-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.tsa-detail-section-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tsa-detail-section-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.tsa-transcript-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tsa-transcript-entry {
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+.tsa-transcript-entry--patient {
+  background-color: #f9fafb;
+}
+
+.tsa-transcript-entry--system {
+  background-color: #e5f2ff;
+}
+
+.tsa-transcript-header {
+  margin-bottom: 4px;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.tsa-transcript-highlight {
+  font-weight: 600;
+  color: #b91c1c;
+}
+
+.tsa-ai-insight {
+  margin-top: 4px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background-color: #ecfdf3;
+  border: 1px solid #bbf7d0;
+  font-size: 12px;
+}
+
+.tsa-ai-insight-header {
+  margin-bottom: 4px;
+}
+
+.tsa-ai-insight-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #166534;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tsa-detail-footer {
+  grid-column: 1 / -1;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background-color: #0f172a;
+  color: #f9fafb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.tsa-detail-footer-note {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tsa-detail-footer-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.tsa-detail-footer-caption {
+  font-size: 12px;
+  color: #e5e7eb;
+}
+
+.tsa-detail-footer-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.tsa-detail-footer-actions .tsa-secondary-button,
+.tsa-detail-footer-actions .tsa-primary-button--emergency {
+  min-width: 130px;
+  padding: 10px 20px;
+  border-radius: 999px;
+}
+
+.tsa-primary-button--emergency {
+  background-color: #ef4444;
+  color: #fef2f2;
+}
+
+.tsa-detail-card--protocol {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tsa-detail-protocol-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.tsa-detail-protocol-subtitle {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.tsa-protocol-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tsa-protocol-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.tsa-protocol-item input {
+  margin-top: 3px;
+}
+
+.tsa-protocol-meta {
+  display: block;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.tsa-protocol-warning {
+  margin-top: 4px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background-color: #fef3c7;
+  border: 1px solid #facc15;
+}
+
+.tsa-protocol-warning-title {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.tsa-protocol-warning-body {
+  margin: 0;
+  font-size: 12px;
+  color: #7c2d12;
+}
+
+.tsa-protocol-map {
+  margin-top: 6px;
+}
+
+.tsa-map-placeholder--mini {
+  height: 120px;
+}
+
+

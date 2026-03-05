@@ -760,26 +760,26 @@ class _MoodCardState extends State<_MoodCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _MoodEmojiChip(
-                emoji: '😊',
+              _MoodIconChip(
+                icon: Icons.sentiment_satisfied_alt_rounded,
                 label: 'Happy',
                 isSelected: _selectedMood == 'Happy',
                 onTap: () => _onMoodSelected('Happy'),
               ),
-              _MoodEmojiChip(
-                emoji: '😔',
+              _MoodIconChip(
+                icon: Icons.sentiment_dissatisfied_rounded,
                 label: 'Sad',
                 isSelected: _selectedMood == 'Sad',
                 onTap: () => _onMoodSelected('Sad'),
               ),
-              _MoodEmojiChip(
-                emoji: '😰',
+              _MoodIconChip(
+                icon: Icons.sentiment_very_dissatisfied_rounded,
                 label: 'Anxious',
                 isSelected: _selectedMood == 'Anxious',
                 onTap: () => _onMoodSelected('Anxious'),
               ),
-              _MoodEmojiChip(
-                emoji: '😌',
+              _MoodIconChip(
+                icon: Icons.self_improvement_rounded,
                 label: 'Calm',
                 isSelected: _selectedMood == 'Calm',
                 onTap: () => _onMoodSelected('Calm'),
@@ -830,21 +830,23 @@ class _MoodCardState extends State<_MoodCard> {
   }
 }
 
-class _MoodEmojiChip extends StatelessWidget {
-  const _MoodEmojiChip({
-    required this.emoji,
+class _MoodIconChip extends StatelessWidget {
+  const _MoodIconChip({
+    required this.icon,
     required this.label,
     required this.isSelected,
     required this.onTap,
   });
 
-  final String emoji;
+  final IconData icon;
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final color = isSelected ? Colors.pink.shade400 : Colors.grey.shade600;
+
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -855,9 +857,10 @@ class _MoodEmojiChip extends StatelessWidget {
               color: isSelected ? const Color(0xFFFFE5F0) : Colors.grey.shade100,
               shape: BoxShape.circle,
             ),
-            child: Text(
-              emoji,
-              style: const TextStyle(fontSize: 20),
+            child: Icon(
+              icon,
+              size: 20,
+              color: color,
             ),
           ),
           const SizedBox(height: 4),
