@@ -149,7 +149,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 </div>
                 <div className="tsa-patient-time">12 mins ago</div>
                 <div className="tsa-row-actions">
-                  <button className="tsa-icon-chip" aria-label="View patient">
+                  <button
+                    className="tsa-icon-chip"
+                    aria-label="View patient"
+                    onClick={() => onNavigate('patientDetail')}
+                  >
                     <ViewIcon />
                   </button>
                   <button className="tsa-icon-chip" aria-label="Call patient">
@@ -174,7 +178,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 </div>
                 <div className="tsa-patient-time">45 mins ago</div>
                 <div className="tsa-row-actions">
-                  <button className="tsa-icon-chip" aria-label="View patient">
+                  <button
+                    className="tsa-icon-chip"
+                    aria-label="View patient"
+                    onClick={() => onNavigate('patientDetail')}
+                  >
                     <ViewIcon />
                   </button>
                   <button className="tsa-icon-chip" aria-label="Call patient">
@@ -199,7 +207,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 </div>
                 <div className="tsa-patient-time">1 hour ago</div>
                 <div className="tsa-row-actions">
-                  <button className="tsa-icon-chip" aria-label="View patient">
+                  <button
+                    className="tsa-icon-chip"
+                    aria-label="View patient"
+                    onClick={() => onNavigate('patientDetail')}
+                  >
                     <ViewIcon />
                   </button>
                   <button className="tsa-icon-chip" aria-label="Call patient">
@@ -224,7 +236,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 </div>
                 <div className="tsa-patient-time">2 hours ago</div>
                 <div className="tsa-row-actions">
-                  <button className="tsa-icon-chip" aria-label="View patient">
+                  <button
+                    className="tsa-icon-chip"
+                    aria-label="View patient"
+                    onClick={() => onNavigate('patientDetail')}
+                  >
                     <ViewIcon />
                   </button>
                   <button className="tsa-icon-chip" aria-label="Call patient">

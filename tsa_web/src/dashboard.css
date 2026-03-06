@@ -942,4 +942,287 @@
   height: 120px;
 }
 
+/* Patient detail page */
+.tsa-main--patient-detail {
+  grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.1fr);
+  align-items: flex-start;
+}
+
+.tsa-patient-detail-left,
+.tsa-patient-detail-right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tsa-patient-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.tsa-patient-detail-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tsa-patient-avatar-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background-color: #e0f2fe;
+  color: #1d4ed8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.tsa-patient-detail-name {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.tsa-patient-detail-meta {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.tsa-patient-risk-pill {
+  margin-left: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background-color: #fef3c7;
+  color: #92400e;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tsa-patient-detail-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.tsa-primary-button--status {
+  width: auto;
+  padding-inline: 16px;
+}
+
+.tsa-patient-detail-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.tsa-patient-metric-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+.tsa-patient-metric-main {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.tsa-patient-metric-value {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.tsa-patient-metric-trend {
+  font-size: 12px;
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.tsa-patient-metric-sub {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.tsa-patient-timeline-card {
+  margin-bottom: 16px;
+}
+
+.tsa-patient-timeline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.tsa-patient-timeline-subtitle {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.tsa-patient-timeline-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.tsa-timeline-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.tsa-timeline-dot--check {
+  background-color: #22c55e;
+}
+
+.tsa-timeline-dot--flag {
+  background-color: #ef4444;
+}
+
+.tsa-timeline-label {
+  margin-right: 8px;
+}
+
+.tsa-patient-timeline-track {
+  position: relative;
+  padding-top: 20px;
+}
+
+.tsa-patient-timeline-line {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #d1d5db, #60a5fa);
+}
+
+.tsa-patient-timeline-marks {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.tsa-patient-timeline-mark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.tsa-timeline-week {
+  color: #6b7280;
+}
+
+.tsa-timeline-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tsa-timeline-pill--alert {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.tsa-timeline-pill--risk {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.tsa-patient-notes-card {
+  margin-bottom: 4px;
+}
+
+.tsa-patient-notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.tsa-patient-notes-meta {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.tsa-patient-notes-body {
+  margin-top: 4px;
+}
+
+.tsa-patient-notes-textarea {
+  width: 100%;
+  min-height: 140px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 10px 12px;
+  font-size: 13px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.tsa-patient-notes-footer {
+  margin-top: 10px;
+  text-align: right;
+}
+
+.tsa-primary-button--notes {
+  width: auto;
+  padding-inline: 18px;
+}
+
+.tsa-identity-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tsa-identity-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.tsa-identity-label {
+  color: #6b7280;
+}
+
+.tsa-identity-value {
+  font-weight: 500;
+}
+
+.tsa-emergency-card {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #f9fafb;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tsa-emergency-body {
+  font-size: 13px;
+}
+
+.tsa-emergency-name {
+  font-weight: 600;
+}
+
+.tsa-emergency-phone {
+  margin-top: 2px;
+  opacity: 0.9;
+}
+
+.tsa-primary-button--quickcall {
+  margin-top: 6px;
+  background-color: #ffffff;
+  color: #1d4ed8;
+}
 
