@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'mother_profile.dart';
+import 'widgets/app_toast.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({
@@ -25,6 +28,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late final TextEditingController _primaryLanguageController;
   late final TextEditingController _dateOfBirthController;
 
+  final List<String> _ghanaLanguages = const [
+    'English',
+    'Akan / Twi',
+    'Ga',
+    'Ewe',
+    'Fante',
+    'Hausa',
+    'Dagbani',
+    'Nzema',
+    'Gonja',
+    'Dagaare',
+    'Kasem',
+    'Other',
+  ];
+
+  String? _selectedLanguage;
+
   @override
   void initState() {
     super.initState();
@@ -38,6 +58,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         TextEditingController(text: widget.profile.primaryLanguage);
     _dateOfBirthController =
         TextEditingController(text: widget.profile.dateOfBirth);
+
+    if (widget.profile.primaryLanguage.isNotEmpty &&
+        _ghanaLanguages.contains(widget.profile.primaryLanguage)) {
+      _selectedLanguage = widget.profile.primaryLanguage;
+    }
   }
 
   @override
@@ -67,7 +92,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  void _onSave() {
+  Future<void> _onSave() async {
     if (!_formKey.currentState!.validate()) return;
 
     final updatedProfile = widget.profile.copyWith(
@@ -80,7 +105,51 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       dateOfBirth: _dateOfBirthController.text.trim(),
     );
 
-    Navigator.of(context).pop<MotherProfile>(updatedProfile);
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        showAppToast('Please sign in again to save your profile.');
+        return;
+      }
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .update({
+        'fullName': updatedProfile.fullName,
+        'email': updatedProfile.email,
+        'phone': updatedProfile.phoneNumber,
+        'ghanaCardId': updatedProfile.ghanaCardId,
+        'primaryLanguage': updatedProfile.primaryLanguage,
+        'dateOfBirth': updatedProfile.dateOfBirth,
+        'linkedFacilityName': updatedProfile.linkedHospitalName,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      Navigator.of(context).pop<MotherProfile>(updatedProfile);
+    } catch (_) {
+      showAppToast('Unable to save your profile. Please try again.');
+    }
+  }
+
+  Future<void> _pickDateOfBirth() async {
+    final now = DateTime.now();
+    final initial = DateTime(now.year - 25, now.month, now.day);
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(1950),
+      lastDate: now,
+    );
+
+    if (picked != null) {
+      final formatted =
+          '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+      setState(() {
+        _dateOfBirthController.text = formatted;
+      });
+    }
   }
 
   @override
@@ -187,12 +256,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  controller: _primaryLanguageController,
+                DropdownButtonFormField<String>(
+                  value: _selectedLanguage,
                   decoration: _fieldDecoration('Primary Language'),
+                  items: _ghanaLanguages
+                      .map(
+                        (lang) => DropdownMenuItem<String>(
+                          value: lang,
+                          child: Text(lang),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedLanguage = value;
+                      _primaryLanguageController.text = value ?? '';
+                    });
+                  },
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your primary language';
+                    if ((value ?? '').trim().isEmpty) {
+                      return 'Please select your primary language';
                     }
                     return null;
                   },
@@ -200,13 +283,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _dateOfBirthController,
+                  readOnly: true,
                   decoration: _fieldDecoration(
                     'Date of Birth',
-                    hint: 'e.g. 12th June 1995',
+                    hint: 'DD/MM/YYYY',
+                  ).copyWith(
+                    suffixIcon: const Icon(Icons.calendar_today_rounded),
                   ),
+                  onTap: _pickDateOfBirth,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your date of birth';
+                      return 'Please select your date of birth';
                     }
                     return null;
                   },

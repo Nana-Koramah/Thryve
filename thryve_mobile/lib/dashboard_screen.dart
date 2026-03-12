@@ -2,12 +2,16 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 import 'mother_profile.dart';
 import 'edit_profile_screen.dart';
 import 'widgets/app_toast.dart';
 import 'smart_plate_screen.dart';
 import 'check_in_screen.dart';
+import 'facility_linkage_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key, this.initialIndex = 0});
@@ -29,11 +33,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     primaryLanguage: 'Twi',
     dateOfBirth: '12th June 1995',
   );
+  bool _isProfileLoading = true;
 
   @override
   void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
+    _loadProfile();
   }
 
   void _onNavTap(int index) {
@@ -66,6 +72,62 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
+  Future<void> _loadProfile() async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        setState(() {
+          _isProfileLoading = false;
+        });
+        return;
+      }
+
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .get();
+
+      if (!doc.exists) {
+        setState(() {
+          _isProfileLoading = false;
+        });
+        return;
+      }
+
+      final data = doc.data() ?? {};
+
+      final loaded = MotherProfile(
+        fullName: (data['fullName'] ?? '') as String,
+        email: (data['email'] ?? '') as String,
+        phoneNumber: (data['phone'] ?? '') as String,
+        ghanaCardId: (data['ghanaCardId'] ?? '') as String,
+        linkedHospitalName: (data['linkedFacilityName'] ?? 'Not linked yet') as String,
+        primaryLanguage: (data['primaryLanguage'] ?? '') as String,
+        dateOfBirth: (data['dateOfBirth'] ?? '') as String,
+        profilePhotoPath: (data['profilePhotoUrl'] ?? '') as String,
+      );
+
+      setState(() {
+        _motherProfile = loaded;
+        _isProfileLoading = false;
+      });
+    } catch (_) {
+      setState(() {
+        _isProfileLoading = false;
+      });
+      showAppToast('Unable to load your profile. Please try again later.');
+    }
+  }
+
+  Future<void> _onChangeFacility() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const FacilityLinkageScreen(),
+      ),
+    );
+    await _loadProfile();
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -94,10 +156,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             _HomeTab(colorScheme: colorScheme),
             const _PlaceholderTab(title: 'Check-in'),
             const _PlaceholderTab(title: 'Meals'),
-            _ProfileTab(
-              profile: _motherProfile,
-              onProfileUpdated: _onProfileUpdated,
-            ),
+            _isProfileLoading
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : _ProfileTab(
+                    profile: _motherProfile,
+                    onProfileUpdated: _onProfileUpdated,
+                    onChangeFacility: _onChangeFacility,
+                  ),
           ],
         ),
       ),
@@ -234,10 +301,12 @@ class _ProfileTab extends StatelessWidget {
   const _ProfileTab({
     required this.profile,
     required this.onProfileUpdated,
+    required this.onChangeFacility,
   });
 
   final MotherProfile profile;
   final ValueChanged<MotherProfile> onProfileUpdated;
+  final VoidCallback onChangeFacility;
 
   Future<void> _onChangePhoto(BuildContext context) async {
     try {
@@ -245,7 +314,29 @@ class _ProfileTab extends StatelessWidget {
       final picked = await picker.pickImage(source: ImageSource.gallery);
       if (picked == null) return;
 
-      final updated = profile.copyWith(profilePhotoPath: picked.path);
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        showAppToast('Please sign in again to update your photo.');
+        return;
+      }
+
+      final file = File(picked.path);
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('users/${currentUser.uid}/profile_photo.jpg');
+
+      await storageRef.putFile(file);
+      final url = await storageRef.getDownloadURL();
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .update({
+        'profilePhotoUrl': url,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      final updated = profile.copyWith(profilePhotoPath: url);
       onProfileUpdated(updated);
       showAppToast('Profile photo updated.');
     } catch (_) {
@@ -426,10 +517,13 @@ class _ProfileTab extends StatelessWidget {
             ),
             child: Column(
               children: [
-                _ProfileInfoRow(
-                  icon: Icons.local_hospital_rounded,
-                  label: 'Linked Facility',
-                  value: profile.linkedHospitalName,
+                GestureDetector(
+                  onTap: onChangeFacility,
+                  child: _ProfileInfoRow(
+                    icon: Icons.local_hospital_rounded,
+                    label: 'Linked Facility',
+                    value: profile.linkedHospitalName,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 _ProfileInfoRow(
@@ -505,9 +599,14 @@ class _ProfileAvatar extends StatelessWidget {
         profile.profilePhotoPath!.isNotEmpty;
 
     if (hasPhoto) {
+      final path = profile.profilePhotoPath!;
+      // If the path looks like a URL, load from network; otherwise treat as local file.
+      final isUrl = path.startsWith('http://') || path.startsWith('https://');
+
       return CircleAvatar(
         radius: 40,
-        backgroundImage: FileImage(File(profile.profilePhotoPath!)),
+        backgroundImage:
+            isUrl ? NetworkImage(path) as ImageProvider : FileImage(File(path)),
       );
     }
 

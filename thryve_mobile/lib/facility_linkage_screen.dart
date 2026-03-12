@@ -47,9 +47,37 @@ class _FacilityLinkageScreenState extends State<FacilityLinkageScreen> {
   Future<void> _loadFacilities() async {
     try {
       final facilities = await _facilityRepository.fetchFacilities();
+
+      // Check if the current user already has a linked facility
+      HealthFacility? linked;
+      try {
+        final currentUser = FirebaseAuth.instance.currentUser;
+        if (currentUser != null) {
+          final userDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(currentUser.uid)
+              .get();
+          final data = userDoc.data();
+          final linkedId = data?['linkedFacilityId'] as String?;
+
+          if (linkedId != null) {
+            for (final facility in facilities) {
+              if (facility.id == linkedId) {
+                linked = facility;
+                break;
+              }
+            }
+          }
+        }
+      } catch (_) {
+        // If this lookup fails, we still show the facilities list;
+        // the user can relink from this screen.
+      }
+
       setState(() {
         _allFacilities = facilities;
         _visibleFacilities = facilities;
+        _linkedFacility = linked;
         _isLoading = false;
       });
     } catch (_) {
@@ -80,7 +108,10 @@ class _FacilityLinkageScreenState extends State<FacilityLinkageScreen> {
     });
   }
 
-  Future<void> _updateLinkedFacility(String? facilityId) async {
+  Future<void> _updateLinkedFacility({
+    required String? facilityId,
+    required String? facilityName,
+  }) async {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) {
@@ -88,8 +119,12 @@ class _FacilityLinkageScreenState extends State<FacilityLinkageScreen> {
         return;
       }
 
-      await FirebaseFirestore.instance.collection('users').doc(currentUser.uid).update({
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .update({
         'linkedFacilityId': facilityId,
+        'linkedFacilityName': facilityName ?? '',
         'updatedAt': FieldValue.serverTimestamp(),
       });
     } catch (_) {
@@ -106,7 +141,10 @@ class _FacilityLinkageScreenState extends State<FacilityLinkageScreen> {
     });
 
     try {
-      await _updateLinkedFacility(facility.id);
+      await _updateLinkedFacility(
+        facilityId: facility.id,
+        facilityName: facility.name,
+      );
       if (!mounted) return;
       setState(() {
         _linkedFacility = facility;
@@ -149,7 +187,7 @@ class _FacilityLinkageScreenState extends State<FacilityLinkageScreen> {
     });
 
     try {
-      await _updateLinkedFacility(null);
+      await _updateLinkedFacility(facilityId: null, facilityName: null);
       if (!mounted) return;
       showAppToast(
         'You can link a facility anytime from your profile.',

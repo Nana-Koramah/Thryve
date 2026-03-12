@@ -55,6 +55,7 @@ class ApiService {
         'primaryLanguage': '',
         'dateOfBirth': '',
         'linkedFacilityId': null,
+        'linkedFacilityName': '',
         'profilePhotoUrl': null,
         'role': 'mother',
         'age': signUpData.age,
