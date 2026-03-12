@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'dashboard_screen.dart';
 import 'signup_step_one.dart';
+import 'widgets/app_toast.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -32,31 +34,63 @@ class _SignInScreenState extends State<SignInScreen> {
       _isSubmitting = true;
     });
 
-    await Future<void>.delayed(const Duration(seconds: 1));
+    try {
+      final rawIdentifier = _identifierController.text.trim();
+      final password = _passwordController.text.trim();
 
-    if (!mounted) return;
+      // If the user typed an email, use it directly; otherwise,
+      // treat the identifier as a phone number and map it to the
+      // same synthetic email we used at sign up.
+      final isEmailLike = rawIdentifier.contains('@');
+      final loginEmail = isEmailLike
+          ? rawIdentifier
+          : '${rawIdentifier}@phone.thryve';
 
-    setState(() {
-      _isSubmitting = false;
-    });
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: loginEmail,
+        password: password,
+      );
 
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => const DashboardScreen(),
-      ),
-    );
+      if (!mounted) return;
+
+      setState(() {
+        _isSubmitting = false;
+      });
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => const DashboardScreen(),
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+
+      String message = 'Unable to sign in. Please check your details.';
+      if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+        message = 'Invalid email/phone or password.';
+      } else if (e.code == 'too-many-requests') {
+        message = 'Too many attempts. Please try again in a moment.';
+      }
+
+      setState(() {
+        _isSubmitting = false;
+      });
+      showAppToast(message);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isSubmitting = false;
+      });
+      showAppToast('Something went wrong. Please try again.');
+    }
   }
 
   void _onSignInWithGoogle() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Google sign-in not yet implemented')),
-    );
+    showAppToast('Google sign-in not yet implemented');
   }
 
   void _onSignInWithApple() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Apple sign-in not yet implemented')),
-    );
+    showAppToast('Apple sign-in not yet implemented');
   }
 
   void _onGoToSignUp() {

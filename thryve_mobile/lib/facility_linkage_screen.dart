@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'dashboard_screen.dart';
 import 'widgets/app_toast.dart';
@@ -16,7 +18,7 @@ class _FacilityLinkageScreenState extends State<FacilityLinkageScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _facilityListController = ScrollController();
 
-  final FacilityRepository _facilityRepository = MockFacilityRepository();
+  final FacilityRepository _facilityRepository = FirestoreFacilityRepository();
 
   List<HealthFacility> _allFacilities = [];
   List<HealthFacility> _visibleFacilities = [];
@@ -25,6 +27,7 @@ class _FacilityLinkageScreenState extends State<FacilityLinkageScreen> {
 
   bool _isLoading = true;
   bool _hasError = false;
+  bool _isSavingLink = false;
 
   @override
   void initState() {
@@ -77,11 +80,47 @@ class _FacilityLinkageScreenState extends State<FacilityLinkageScreen> {
     });
   }
 
-  void _onLinkFacility(HealthFacility facility) {
+  Future<void> _updateLinkedFacility(String? facilityId) async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        showAppToast('Please sign in again to link a facility.');
+        return;
+      }
+
+      await FirebaseFirestore.instance.collection('users').doc(currentUser.uid).update({
+        'linkedFacilityId': facilityId,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (_) {
+      showAppToast('Unable to update your linked facility. Please try again.');
+      rethrow;
+    }
+  }
+
+  Future<void> _onLinkFacility(HealthFacility facility) async {
+    if (_isSavingLink) return;
+
     setState(() {
-      _linkedFacility = facility;
+      _isSavingLink = true;
     });
-    showAppToast('Facility linked successfully to ${facility.name}.');
+
+    try {
+      await _updateLinkedFacility(facility.id);
+      if (!mounted) return;
+      setState(() {
+        _linkedFacility = facility;
+      });
+      showAppToast('Facility linked successfully to ${facility.name}.');
+    } catch (_) {
+      // toast already shown in _updateLinkedFacility
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSavingLink = false;
+        });
+      }
+    }
   }
 
   void _onHighlightFacility(HealthFacility facility) {
@@ -102,15 +141,31 @@ class _FacilityLinkageScreenState extends State<FacilityLinkageScreen> {
     }
   }
 
-  void _onSkip() {
-    showAppToast(
-      'You can link a facility anytime from your profile.',
-    );
+  Future<void> _onSkip() async {
+    if (_isSavingLink) return;
 
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const DashboardScreen()),
-      (route) => false,
-    );
+    setState(() {
+      _isSavingLink = true;
+    });
+
+    try {
+      await _updateLinkedFacility(null);
+      if (!mounted) return;
+      showAppToast(
+        'You can link a facility anytime from your profile.',
+      );
+
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        (route) => false,
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSavingLink = false;
+        });
+      }
+    }
   }
 
   void _onContinue() {
@@ -251,7 +306,8 @@ class _FacilityLinkageScreenState extends State<FacilityLinkageScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: _linkedFacility == null ? null : _onContinue,
+                      onPressed:
+                          _isSavingLink || _linkedFacility == null ? null : _onContinue,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: colorScheme.secondary,
                         foregroundColor: Colors.white,
@@ -273,7 +329,7 @@ class _FacilityLinkageScreenState extends State<FacilityLinkageScreen> {
                   ),
                   const SizedBox(height: 8),
                   TextButton(
-                    onPressed: _onSkip,
+                    onPressed: _isSavingLink ? null : _onSkip,
                     child: Text(
                       'Skip for now',
                       style: TextStyle(
@@ -334,7 +390,7 @@ class _FacilityLinkageScreenState extends State<FacilityLinkageScreen> {
           isLinked: isLinked,
           isHighlighted: isHighlighted,
           colorScheme: colorScheme,
-          onLinkPressed: () => _onLinkFacility(facility),
+          onLinkPressed: _isSavingLink ? null : () => _onLinkFacility(facility),
           onTap: () => _onHighlightFacility(facility),
         );
       },
@@ -512,7 +568,7 @@ class _FacilityCard extends StatelessWidget {
   final bool isLinked;
   final bool isHighlighted;
   final ColorScheme colorScheme;
-  final VoidCallback onLinkPressed;
+  final VoidCallback? onLinkPressed;
   final VoidCallback onTap;
 
   @override
@@ -752,40 +808,27 @@ abstract class FacilityRepository {
   Future<List<HealthFacility>> fetchFacilities();
 }
 
-class MockFacilityRepository implements FacilityRepository {
+class FirestoreFacilityRepository implements FacilityRepository {
   @override
   Future<List<HealthFacility>> fetchFacilities() async {
-    await Future<void>.delayed(const Duration(milliseconds: 350));
+    final snapshot =
+        await FirebaseFirestore.instance.collection('facilities').get();
 
-    return const [
-      HealthFacility(
-        id: 'garh',
-        name: 'Greater Accra Regional Hospital',
-        address: 'Castle Road, Ridge, Accra',
-        region: 'Greater Accra',
-        latitude: 5.561618,
-        longitude: -0.198676,
-        distanceKm: 0.8,
-      ),
-      HealthFacility(
-        id: 'korle-bu',
-        name: 'Korle Bu Teaching Hospital',
-        address: 'Guggisberg Avenue, Accra',
-        region: 'Greater Accra',
-        latitude: 5.537833,
-        longitude: -0.227408,
-        distanceKm: 4.2,
-      ),
-      HealthFacility(
-        id: 'adabraka-poly',
-        name: 'Adabraka Polyclinic',
-        address: 'Adabraka, Accra',
-        region: 'Greater Accra',
-        latitude: 5.5618842,
-        longitude: -0.2051079,
-        distanceKm: 1.5,
-      ),
-    ];
+    return snapshot.docs.map((doc) {
+      final data = doc.data();
+
+      return HealthFacility(
+        id: doc.id,
+        name: (data['name'] ?? '') as String,
+        address: (data['district'] ?? '') as String,
+        region: (data['region'] ?? '') as String,
+        latitude: (data['latitude'] as num?)?.toDouble() ?? 0,
+        longitude: (data['longitude'] as num?)?.toDouble() ?? 0,
+        // Distance will be refined later when we have location;
+        // for now, we just show 0.
+        distanceKm: 0,
+      );
+    }).toList();
   }
 }
 
