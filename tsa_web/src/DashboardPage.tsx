@@ -46,89 +46,110 @@ interface DashboardPageProps {
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
   return (
-    <div className="tsa-root">
-      <header className="tsa-topbar">
-        <div className="tsa-topbar-left">
-          <div className="tsa-logo">
+    <div className="min-h-screen bg-tsa-surface text-slate-900 flex flex-col">
+      <header className="h-14 px-6 bg-tsa-navy text-slate-50 flex items-center justify-between">
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
             <img
               src="/thryve _logo.png"
               alt="Thryve System Analytics"
-              className="tsa-logo-image"
+              className="h-6"
             />
           </div>
-          <nav className="tsa-nav">
-            <button className="tsa-nav-item tsa-nav-item--active">Live Feed</button>
-            <button className="tsa-nav-item" onClick={() => onNavigate('escalations')}>
+          <nav className="flex items-center gap-2 text-xs">
+            <button className="px-3 py-1.5 rounded-full bg-slate-900 text-slate-50 font-medium">
+              Live Feed
+            </button>
+            <button
+              className="px-3 py-1.5 rounded-full text-slate-300 hover:bg-slate-800/60 transition"
+              onClick={() => onNavigate('escalations')}
+            >
               Escalations
             </button>
-            <button className="tsa-nav-item">Patients</button>
-            <button className="tsa-nav-item">Referrals</button>
-            <button className="tsa-nav-item">Institutional Reports</button>
+            <button className="px-3 py-1.5 rounded-full text-slate-300 hover:bg-slate-800/60 transition">
+              Patients
+            </button>
+            <button className="px-3 py-1.5 rounded-full text-slate-300 hover:bg-slate-800/60 transition">
+              Referrals
+            </button>
+            <button className="px-3 py-1.5 rounded-full text-slate-300 hover:bg-slate-800/60 transition">
+              Institutional Reports
+            </button>
           </nav>
         </div>
-        <div className="tsa-topbar-right">
-          <div className="tsa-search">
+        <div className="flex items-center gap-4">
+          <div>
             <input
               type="text"
               placeholder="Search Patient ID or Name"
               aria-label="Search Patient ID or Name"
+              className="w-64 px-3 py-1.5 rounded-full border border-slate-200 bg-white text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-tsa-accent-blue/40"
             />
           </div>
-          <div className="tsa-topbar-icons">
-            <button className="tsa-icon-button" aria-label="Notifications">
+          <div className="flex items-center gap-2">
+            <button
+              className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-slate-50"
+              aria-label="Notifications"
+            >
               <BellIcon />
             </button>
-            <button className="tsa-icon-button" aria-label="Settings">
+            <button
+              className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-slate-50"
+              aria-label="Settings"
+            >
               <SettingsIcon />
             </button>
-            <div className="tsa-avatar">GH</div>
+            <div className="w-8 h-8 rounded-full bg-tsa-accent-blue text-white flex items-center justify-center text-xs font-semibold">
+              GH
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="tsa-main">
-        <section className="tsa-main-left">
-          <header className="tsa-page-header">
+      <main className="flex-1 max-w-6xl mx-auto mt-6 mb-10 px-6 grid grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)] gap-5">
+        <section className="flex flex-col gap-5">
+          <header className="flex items-center justify-between mb-1">
             <div />
-            <div className="tsa-system-status">
-              <span className="tsa-system-dot" />
+            <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
               <span>System Active</span>
             </div>
           </header>
 
-          <section className="tsa-metrics-row">
-            <article className="tsa-metric-card">
-              <div className="tsa-metric-label">Active Red Flags</div>
-              <div className="tsa-metric-value">12</div>
-              <div className="tsa-metric-caption tsa-metric-caption--negative">
-                +2 from last hour
-              </div>
+          <section className="grid grid-cols-3 gap-3">
+            <article className="bg-white rounded-card shadow-card px-4 py-3.5">
+              <div className="text-xs text-slate-500">Active Red Flags</div>
+              <div className="mt-1 text-2xl font-semibold">12</div>
+              <div className="mt-1 text-[11px] text-rose-700">+2 from last hour</div>
             </article>
 
-            <article className="tsa-metric-card">
-              <div className="tsa-metric-label">Avg. Triage Response</div>
-              <div className="tsa-metric-value">18m 45s</div>
-              <div className="tsa-metric-caption tsa-metric-caption--positive">
-                +5% efficiency gain
-              </div>
+            <article className="bg-white rounded-card shadow-card px-4 py-3.5">
+              <div className="text-xs text-slate-500">Avg. Triage Response</div>
+              <div className="mt-1 text-2xl font-semibold">18m 45s</div>
+              <div className="mt-1 text-[11px] text-emerald-700">+5% efficiency gain</div>
             </article>
 
-            <article className="tsa-metric-card">
-              <div className="tsa-metric-label">Pending Referrals</div>
-              <div className="tsa-metric-value">05</div>
-              <div className="tsa-metric-caption">Queue Stable</div>
+            <article className="bg-white rounded-card shadow-card px-4 py-3.5">
+              <div className="text-xs text-slate-500">Pending Referrals</div>
+              <div className="mt-1 text-2xl font-semibold">05</div>
+              <div className="mt-1 text-[11px] text-slate-500">Queue Stable</div>
             </article>
           </section>
 
-          <section className="tsa-card tsa-patient-feed">
-            <header className="tsa-card-header">
-              <div className="tsa-card-header-actions">
-                <button className="tsa-secondary-button">Filter</button>
-                <button className="tsa-secondary-button">Export CSV</button>
+          <section className="bg-white rounded-card shadow-card p-4">
+            <header className="flex items-center justify-end mb-3">
+              <div className="flex gap-2">
+                <button className="px-3 py-1.5 rounded-full border border-slate-200 bg-white text-xs text-slate-700 hover:bg-slate-50">
+                  Filter
+                </button>
+                <button className="px-3 py-1.5 rounded-full border border-slate-200 bg-white text-xs text-slate-700 hover:bg-slate-50">
+                  Export CSV
+                </button>
               </div>
             </header>
-            <div className="tsa-table">
-              <div className="tsa-table-header">
+
+            <div>
+              <div className="grid grid-cols-[1.5fr_1fr_2.2fr_0.8fr_0.8fr] gap-2 py-2 text-[11px] text-slate-500">
                 <span>Patient Name &amp; ID</span>
                 <span>Status</span>
                 <span>Summary</span>
@@ -136,170 +157,209 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 <span>Actions</span>
               </div>
 
-              <div className="tsa-table-row">
+              <div className="grid grid-cols-[1.5fr_1fr_2.2fr_0.8fr_0.8fr] gap-2 py-2.5 border-t border-slate-200 text-sm items-center">
                 <div>
-                  <div className="tsa-patient-name">Abena Mensah</div>
-                  <div className="tsa-patient-id">GHA-2024-2093</div>
+                  <div className="font-semibold">Abena Mensah</div>
+                  <div className="text-[11px] text-slate-500">GHA-2024-2093</div>
                 </div>
                 <div>
-                  <span className="tsa-pill tsa-pill--urgent">Urgent: Sepsis</span>
+                  <span className="inline-flex px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-700">
+                    Urgent: Sepsis
+                  </span>
                 </div>
-                <div className="tsa-patient-summary">
+                <div className="text-xs text-slate-600">
                   BP: 140/90 · Temp: 38.5°C · HR: 110
                 </div>
-                <div className="tsa-patient-time">12 mins ago</div>
-                <div className="tsa-row-actions">
+                <div className="text-[11px] text-slate-500">12 mins ago</div>
+                <div className="flex gap-1">
                   <button
-                    className="tsa-icon-chip"
+                    className="w-7 h-7 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center text-xs hover:bg-slate-100"
                     aria-label="View patient"
                     onClick={() => onNavigate('patientDetail')}
                   >
                     <ViewIcon />
                   </button>
-                  <button className="tsa-icon-chip" aria-label="Call patient">
+                  <button
+                    className="w-7 h-7 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center text-xs hover:bg-slate-100"
+                    aria-label="Call patient"
+                  >
                     <PhoneIcon />
                   </button>
-                  <button className="tsa-icon-chip" aria-label="Open chat">
+                  <button
+                    className="w-7 h-7 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center text-xs hover:bg-slate-100"
+                    aria-label="Open chat"
+                  >
                     <ChatIcon />
                   </button>
                 </div>
               </div>
 
-              <div className="tsa-table-row">
+              <div className="grid grid-cols-[1.5fr_1fr_2.2fr_0.8fr_0.8fr] gap-2 py-2.5 border-t border-slate-200 text-sm items-center">
                 <div>
-                  <div className="tsa-patient-name">Esi Boateng</div>
-                  <div className="tsa-patient-id">GHA-ADC-0213</div>
+                  <div className="font-semibold">Esi Boateng</div>
+                  <div className="text-[11px] text-slate-500">GHA-ADC-0213</div>
                 </div>
                 <div>
-                  <span className="tsa-pill tsa-pill--ppd">Urgent: PPD Risk</span>
+                  <span className="inline-flex px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-700">
+                    Urgent: PPD Risk
+                  </span>
                 </div>
-                <div className="tsa-patient-summary">
+                <div className="text-xs text-slate-600">
                   Behavioural flags detected · Self-harm risk
                 </div>
-                <div className="tsa-patient-time">45 mins ago</div>
-                <div className="tsa-row-actions">
+                <div className="text-[11px] text-slate-500">45 mins ago</div>
+                <div className="flex gap-1">
                   <button
-                    className="tsa-icon-chip"
+                    className="w-7 h-7 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center text-xs hover:bg-slate-100"
                     aria-label="View patient"
                     onClick={() => onNavigate('patientDetail')}
                   >
                     <ViewIcon />
                   </button>
-                  <button className="tsa-icon-chip" aria-label="Call patient">
+                  <button
+                    className="w-7 h-7 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center text-xs hover:bg-slate-100"
+                    aria-label="Call patient"
+                  >
                     <PhoneIcon />
                   </button>
-                  <button className="tsa-icon-chip" aria-label="Open chat">
+                  <button
+                    className="w-7 h-7 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center text-xs hover:bg-slate-100"
+                    aria-label="Open chat"
+                  >
                     <ChatIcon />
                   </button>
                 </div>
               </div>
 
-              <div className="tsa-table-row">
+              <div className="grid grid-cols-[1.5fr_1fr_2.2fr_0.8fr_0.8fr] gap-2 py-2.5 border-t border-slate-200 text-sm items-center">
                 <div>
-                  <div className="tsa-patient-name">Esi Arhin</div>
-                  <div className="tsa-patient-id">GHA-ACC-1102</div>
+                  <div className="font-semibold">Esi Arhin</div>
+                  <div className="text-[11px] text-slate-500">GHA-ACC-1102</div>
                 </div>
                 <div>
-                  <span className="tsa-pill tsa-pill--stable">Stable</span>
+                  <span className="inline-flex px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700">
+                    Stable
+                  </span>
                 </div>
-                <div className="tsa-patient-summary">
+                <div className="text-xs text-slate-600">
                   BP: 120/80 · Temp: 36.6°C · Baseline
                 </div>
-                <div className="tsa-patient-time">1 hour ago</div>
-                <div className="tsa-row-actions">
+                <div className="text-[11px] text-slate-500">1 hour ago</div>
+                <div className="flex gap-1">
                   <button
-                    className="tsa-icon-chip"
+                    className="w-7 h-7 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center text-xs hover:bg-slate-100"
                     aria-label="View patient"
                     onClick={() => onNavigate('patientDetail')}
                   >
                     <ViewIcon />
                   </button>
-                  <button className="tsa-icon-chip" aria-label="Call patient">
+                  <button
+                    className="w-7 h-7 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center text-xs hover:bg-slate-100"
+                    aria-label="Call patient"
+                  >
                     <PhoneIcon />
                   </button>
-                  <button className="tsa-icon-chip" aria-label="Open chat">
+                  <button
+                    className="w-7 h-7 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center text-xs hover:bg-slate-100"
+                    aria-label="Open chat"
+                  >
                     <ChatIcon />
                   </button>
                 </div>
               </div>
 
-              <div className="tsa-table-row">
+              <div className="grid grid-cols-[1.5fr_1fr_2.2fr_0.8fr_0.8fr] gap-2 py-2.5 border-t border-slate-200 text-sm items-center">
                 <div>
-                  <div className="tsa-patient-name">Ama Serwaa</div>
-                  <div className="tsa-patient-id">GHA-EMU-4410</div>
+                  <div className="font-semibold">Ama Serwaa</div>
+                  <div className="text-[11px] text-slate-500">GHA-EMU-4410</div>
                 </div>
                 <div>
-                  <span className="tsa-pill tsa-pill--stable">Stable</span>
+                  <span className="inline-flex px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700">
+                    Stable
+                  </span>
                 </div>
-                <div className="tsa-patient-summary">
+                <div className="text-xs text-slate-600">
                   Routine ANC follow-up · Remote sync
                 </div>
-                <div className="tsa-patient-time">2 hours ago</div>
-                <div className="tsa-row-actions">
+                <div className="text-[11px] text-slate-500">2 hours ago</div>
+                <div className="flex gap-1">
                   <button
-                    className="tsa-icon-chip"
+                    className="w-7 h-7 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center text-xs hover:bg-slate-100"
                     aria-label="View patient"
                     onClick={() => onNavigate('patientDetail')}
                   >
                     <ViewIcon />
                   </button>
-                  <button className="tsa-icon-chip" aria-label="Call patient">
+                  <button
+                    className="w-7 h-7 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center text-xs hover:bg-slate-100"
+                    aria-label="Call patient"
+                  >
                     <PhoneIcon />
                   </button>
-                  <button className="tsa-icon-chip" aria-label="Open chat">
+                  <button
+                    className="w-7 h-7 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center text-xs hover:bg-slate-100"
+                    aria-label="Open chat"
+                  >
                     <ChatIcon />
                   </button>
                 </div>
               </div>
             </div>
-            <div className="tsa-table-footer">
-              <button className="tsa-link-button">View 18 more patients</button>
+
+            <div className="mt-3 text-center">
+              <button className="text-xs text-tsa-accent-blue hover:underline">
+                View 18 more patients
+              </button>
             </div>
           </section>
         </section>
 
-        <aside className="tsa-main-right">
-          <section className="tsa-card tsa-redflags">
-            <header className="tsa-card-header tsa-card-header--space-between">
-              <h2>Red Flags</h2>
-              <span className="tsa-live-pill">LIVE</span>
+        <aside className="flex flex-col gap-4">
+          <section className="bg-white rounded-card shadow-card p-4 flex flex-col gap-3">
+            <header className="flex items-center justify-between">
+              <span className="text-sm font-semibold">Red Flags</span>
+              <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[11px] font-semibold">
+                LIVE
+              </span>
             </header>
 
-            <article className="tsa-alert-card tsa-alert-card--primary">
-              <div className="tsa-alert-header">
+            <article className="rounded-[14px] px-3.5 py-3 bg-gradient-to-r from-rose-500 to-rose-400 text-rose-50 mb-2">
+              <div className="flex items-center justify-between mb-1.5">
                 <div>
-                  <div className="tsa-alert-title">Abena</div>
-                  <div className="tsa-alert-subtitle">Emergency Triage</div>
+                  <div className="font-semibold">Abena</div>
+                  <div className="text-xs opacity-80">Emergency Triage</div>
                 </div>
-                <div className="tsa-alert-timer">28:42</div>
+                <div className="text-sm font-semibold">28:42</div>
               </div>
-              <p className="tsa-alert-body">
+              <p className="text-xs mb-2.5">
                 Maternal Sepsis Suspected. High fever detected during remote monitoring.
               </p>
-              <button className="tsa-primary-button">Acknowledge</button>
+              <button className="w-full rounded-full bg-amber-100 text-amber-900 text-sm font-semibold py-2">
+                Acknowledge
+              </button>
             </article>
 
-            <article className="tsa-alert-card tsa-alert-card--secondary">
-              <div className="tsa-alert-header">
+            <article className="rounded-[14px] px-3.5 py-3 border border-slate-200 bg-slate-50">
+              <div className="flex items-center justify-between mb-1.5">
                 <div>
-                  <div className="tsa-alert-title">Esi Boateng</div>
-                  <div className="tsa-alert-subtitle">Awaiting Action</div>
+                  <div className="font-semibold">Esi Boateng</div>
+                  <div className="text-xs text-slate-600">Awaiting Action</div>
                 </div>
-                <div className="tsa-alert-timer">12:15</div>
+                <div className="text-sm font-semibold text-slate-700">12:15</div>
               </div>
-              <p className="tsa-alert-body">
+              <p className="text-xs text-slate-700 mb-2.5">
                 Postpartum Depression Risk: Critical screening score (EPDS &gt; 20).
               </p>
-              <button className="tsa-secondary-button tsa-secondary-button--full">
+              <button className="w-full rounded-full border border-slate-200 bg-white text-xs font-medium py-1.5">
                 Review Data
               </button>
             </article>
 
-            <div className="tsa-card tsa-map-card">
-              <div className="tsa-card-header">
-                <h3>Facility Referral Map</h3>
+            <div className="mt-3 rounded-card bg-white shadow-card p-3.5">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold">Facility Referral Map</span>
               </div>
-              <div className="tsa-map-placeholder">
+              <div className="h-28 rounded-xl bg-gradient-to-tr from-blue-100 to-slate-50 flex items-center justify-center text-xs text-slate-600">
                 <span>Map placeholder – referral network</span>
               </div>
             </div>

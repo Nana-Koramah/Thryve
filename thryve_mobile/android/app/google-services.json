@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "111101222893",
+    "project_id": "thryve-27216",
+    "storage_bucket": "thryve-27216.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:111101222893:android:2beac5315530de8ba851e4",
+        "android_client_info": {
+          "package_name": "com.example.thryve_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgV1C2ZA6m0hV5Q4nECg4-WNaBxeXAgYk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
