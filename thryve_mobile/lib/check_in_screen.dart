@@ -1,5 +1,12 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:record/record.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'check_in_service.dart';
 import 'widgets/app_toast.dart';
 import 'dashboard_screen.dart';
 import 'smart_plate_screen.dart';
@@ -14,6 +21,7 @@ class CheckInScreen extends StatefulWidget {
 class _CheckInScreenState extends State<CheckInScreen> {
   final Set<String> _selectedSymptoms = {};
   final TextEditingController _detailsController = TextEditingController();
+  final TextEditingController _ppdTextController = TextEditingController();
 
   final List<_SymptomOption> _symptomOptions = const [
     _SymptomOption(id: 'heavy_bleeding', label: 'Heavy Bleeding', isSevere: true),
@@ -24,11 +32,51 @@ class _CheckInScreenState extends State<CheckInScreen> {
     _SymptomOption(id: 'hard_to_breathe', label: 'Hard to Breathe', isSevere: true),
   ];
 
+  final AudioRecorder _recorder = AudioRecorder();
   bool _isListening = false;
+  String? _currentRecordingPath;
+  String? _recordedAudioPath;
+  bool _isSavingPpd = false;
+  bool _isSendingReport = false;
+  String _firstName = 'Mama';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFirstName();
+  }
+
+  Future<void> _loadFirstName() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      final data = doc.data();
+      final fullName = (data?['fullName'] as String?)?.trim();
+      if (fullName == null || fullName.isEmpty) return;
+
+      final parts = fullName.split(' ');
+      final first = parts.isNotEmpty ? parts.first : fullName;
+
+      if (mounted) {
+        setState(() {
+          _firstName = first;
+        });
+      }
+    } catch (_) {
+      // If anything fails, we silently keep the default "Mama".
+    }
+  }
 
   @override
   void dispose() {
     _detailsController.dispose();
+    _ppdTextController.dispose();
+    _recorder.dispose();
     super.dispose();
   }
 
@@ -42,40 +90,90 @@ class _CheckInScreenState extends State<CheckInScreen> {
     });
   }
 
-  void _onSendReport() {
+  Future<void> _onSendReport() async {
     if (_selectedSymptoms.isEmpty) {
       showAppToast('Please select at least one symptom.');
       return;
     }
-
-    final hasSevere = _symptomOptions
-        .where((s) => s.isSevere)
-        .any((s) => _selectedSymptoms.contains(s.id));
-
-    if (hasSevere) {
-      showAppToast(
-        'Red flag alert generated for your hospital. In the full version this will be sent automatically.',
+    if (_isSendingReport) return;
+    setState(() => _isSendingReport = true);
+    try {
+      final service = CheckInService();
+      await service.submitRedFlagReport(
+        symptomIds: _selectedSymptoms.toList(),
+        additionalNotes: _detailsController.text.trim().isEmpty
+            ? null
+            : _detailsController.text.trim(),
       );
-    } else {
-      showAppToast('Your symptoms have been logged for your care team.');
+      if (mounted) {
+        showAppToast('Report sent to your care team.');
+      }
+    } on CheckInException catch (e) {
+      if (mounted) showAppToast(e.message);
+    } catch (_) {
+      if (mounted) showAppToast('Could not send report. Please try again.');
+    } finally {
+      if (mounted) setState(() => _isSendingReport = false);
     }
   }
 
-  void _toggleListening() {
-    setState(() {
-      _isListening = !_isListening;
-    });
-
+  Future<void> _toggleListening() async {
     if (_isListening) {
-      showAppToast(
-        'Audio PPD screening coming soon. We’ll ask questions from the Edinburgh Postnatal Depression Scale in your language.',
-      );
+      await _recorder.stop();
+      setState(() {
+        _recordedAudioPath = _currentRecordingPath;
+        _currentRecordingPath = null;
+        _isListening = false;
+      });
+      if (mounted) showAppToast('Recording saved. Tap Save and Exit when ready.');
+      return;
+    }
+    final hasPermission = await _recorder.hasPermission();
+    if (!hasPermission) {
+      showAppToast('Microphone permission is needed to record.');
+      return;
+    }
+    try {
+      final dir = await getTemporaryDirectory();
+      final path = '${dir.path}/ppd_${DateTime.now().millisecondsSinceEpoch}.m4a';
+      await _recorder.start(const RecordConfig(encoder: AudioEncoder.aacLc), path: path);
+      setState(() {
+        _currentRecordingPath = path;
+        _isListening = true;
+      });
+      if (mounted) showAppToast('Recording… tap the mic again to stop.');
+    } catch (_) {
+      if (mounted) showAppToast('Could not start recording. Please try again.');
     }
   }
 
-  void _onSaveAndExit() {
-    showAppToast('Your PPD check-in has been saved for your care team.');
-    Navigator.of(context).maybePop();
+  Future<void> _onSaveAndExit() async {
+    final hasAudio = _recordedAudioPath != null &&
+        (await File(_recordedAudioPath!).exists());
+    final hasText = _ppdTextController.text.trim().isNotEmpty;
+    if (!hasAudio && !hasText) {
+      showAppToast('Record audio or type how you feel, then save.');
+      return;
+    }
+    if (_isSavingPpd) return;
+    setState(() => _isSavingPpd = true);
+    try {
+      final service = CheckInService();
+      await service.submitPpdScreening(
+        audioFile: hasAudio ? File(_recordedAudioPath!) : null,
+        textSummary: hasText ? _ppdTextController.text.trim() : null,
+      );
+      if (mounted) {
+        showAppToast('Your PPD check-in has been saved for your care team.');
+        Navigator.of(context).maybePop();
+      }
+    } on CheckInException catch (e) {
+      if (mounted) showAppToast(e.message);
+    } catch (_) {
+      if (mounted) showAppToast('Could not save. Please try again.');
+    } finally {
+      if (mounted) setState(() => _isSavingPpd = false);
+    }
   }
 
   @override
@@ -158,29 +256,9 @@ class _CheckInScreenState extends State<CheckInScreen> {
                               color: Colors.grey.shade100,
                               borderRadius: BorderRadius.circular(16),
                             ),
-                            child: const Text(
-                              'Hi Mama, I\'m here to check in on you. How have you been feeling lately? Are you getting enough rest?',
-                              style: TextStyle(fontSize: 13),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE0F2FF),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: const Text(
-                              'I\'ve been feeling a bit overwhelmed lately with the new baby… it\'s hard to find time for myself.',
-                              style: TextStyle(fontSize: 13),
+                            child: Text(
+                              'Hi $_firstName, I\'m here to check in on you. How have you been feeling lately? Are you getting enough rest?',
+                              style: const TextStyle(fontSize: 13),
                             ),
                           ),
                         ),
@@ -247,11 +325,31 @@ class _CheckInScreenState extends State<CheckInScreen> {
                               color: Colors.grey.shade700,
                             ),
                           ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Or type how you feel (optional)',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          TextField(
+                            controller: _ppdTextController,
+                            maxLines: 2,
+                            decoration: InputDecoration(
+                              hintText: 'Type your thoughts here…',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              contentPadding: const EdgeInsets.all(12),
+                            ),
+                          ),
                           const SizedBox(height: 16),
                           SizedBox(
                             width: double.infinity,
                             child: OutlinedButton(
-                              onPressed: _onSaveAndExit,
+                              onPressed: _isSavingPpd ? null : _onSaveAndExit,
                               style: OutlinedButton.styleFrom(
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(24),
@@ -259,7 +357,15 @@ class _CheckInScreenState extends State<CheckInScreen> {
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 12),
                               ),
-                              child: const Text('Save and Exit'),
+                              child: _isSavingPpd
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Text('Save and Exit'),
                             ),
                           ),
                         ],
@@ -360,7 +466,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _onSendReport,
+                  onPressed: _isSendingReport ? null : _onSendReport,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colorScheme.secondary,
                     foregroundColor: Colors.white,
@@ -369,13 +475,22 @@ class _CheckInScreenState extends State<CheckInScreen> {
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  child: const Text(
-                    'Send Report to Care Team',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  child: _isSendingReport
+                      ? const SizedBox(
+                          height: 22,
+                          width: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Send Report to Care Team',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
             ],

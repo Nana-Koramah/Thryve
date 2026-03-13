@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Mothers' profiles – read/update own only; create at signup
+    match /users/{uid} {
+      allow read, update: if request.auth != null && request.auth.uid == uid;
+      allow create: if request.auth != null;
+    }
+
+    // Facilities – any authenticated user can read; no client write
+    match /facilities/{facilityId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // Check-ins – mothers create and read own only
+    match /checkIns/{docId} {
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // PPD screenings – mothers create and read own only
+    match /ppdScreenings/{docId} {
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // Alerts – mothers create (own userId); staff read/update when facility matches
+    match /alerts/{alertId} {
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow read, update: if request.auth != null && (
+        resource.data.userId == request.auth.uid ||
+        (get(/databases/$(database)/documents/staff/$(request.auth.uid)).data.facilityId != null &&
+         resource.data.facilityId == get(/databases/$(database)/documents/staff/$(request.auth.uid)).data.facilityId)
+      );
+      allow delete: if false;
+    }
+
+    // Staff – staff read own only
+    match /staff/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
