@@ -66,6 +66,58 @@ class CheckInService {
     });
   }
 
+  /// Submits a full EPDS questionnaire result with score and risk level.
+  Future<void> submitEpdsResult({
+    required int totalScore,
+    required String riskLevel,
+    required List<Map<String, dynamic>> answers,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) throw CheckInException('You must be signed in to submit.');
+
+    final userDoc = await _firestore.collection('users').doc(user.uid).get();
+    final data = userDoc.data();
+    final facilityId = data?['linkedFacilityId'] as String?;
+    final facilityName = data?['linkedFacilityName'] as String? ?? '';
+    final language = data?['primaryLanguage'] as String? ?? '';
+    final fullName = data?['fullName'] as String? ?? '';
+
+    final now = FieldValue.serverTimestamp();
+
+    await _firestore.collection('ppdScreenings').add({
+      'userId': user.uid,
+      'facilityId': facilityId,
+      'facilityName': facilityName,
+      'conductedAt': now,
+      'totalScore': totalScore,
+      'answers': answers,
+      'riskLevel': riskLevel,
+      'language': language,
+      'audioUrl': null,
+      'textSummary': null,
+      'createdAt': now,
+    });
+
+    // High-risk EPDS threshold: 13+ triggers an alert.
+    if (totalScore >= 13 && facilityId != null && facilityId.isNotEmpty) {
+      await _firestore.collection('alerts').add({
+        'userId': user.uid,
+        'facilityId': facilityId,
+        'source': 'ppd_screening',
+        'severity': 'high',
+        'status': 'new',
+        'summary': 'High PPD risk (EPDS score $totalScore)',
+        'payload': <String, dynamic>{
+          'totalScore': totalScore,
+          'riskLevel': riskLevel,
+          'motherName': fullName,
+        },
+        'createdAt': now,
+        'updatedAt': now,
+      });
+    }
+  }
+
   /// Submits a Red Flag report: creates a [checkIns] document and, if any
   /// selected symptom is severe, also creates an [alerts] document.
   Future<void> submitRedFlagReport({

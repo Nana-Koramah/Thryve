@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'check_in_service.dart';
+import 'epds_questionnaire_screen.dart';
 import 'widgets/app_toast.dart';
 import 'dashboard_screen.dart';
 import 'smart_plate_screen.dart';
@@ -326,6 +327,24 @@ class _CheckInScreenState extends State<CheckInScreen> {
                             ),
                           ),
                           const SizedBox(height: 12),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      const EpdsQuestionnaireScreen(),
+                                ),
+                              );
+                            },
+                            child: const Text(
+                              'Take full PPD questionnaire',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
                           Text(
                             'Or type how you feel (optional)',
                             style: TextStyle(

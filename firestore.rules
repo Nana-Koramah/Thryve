@@ -45,6 +45,13 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Meals – mothers create and read their own meals
+    match /meals/{mealId} {
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

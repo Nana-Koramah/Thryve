@@ -1,11 +1,14 @@
 import 'dart:io';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'widgets/app_toast.dart';
 import 'dashboard_screen.dart';
 import 'check_in_screen.dart';
+import 'meal_service.dart';
 
 class SmartPlateScreen extends StatefulWidget {
   const SmartPlateScreen({super.key});
@@ -61,20 +64,53 @@ class _SmartPlateScreenState extends State<SmartPlateScreen> {
   final Set<String> _selectedIngredientIds = {};
   File? _mealPhoto;
   bool _isSaving = false;
+  int _currentTipIndex = 0;
+  Timer? _tipTimer;
 
   static const double _dailyIronTargetMg = 15; // simple placeholder
   static const double _dailyFolateTargetMcg = 400;
 
+  static const List<String> _maternalTips = [
+    'Small, frequent meals with iron-rich foods like beans, leafy greens and fortified cereals support recovery and energy.',
+    'Remember to drink water regularly throughout the day – staying hydrated helps with milk production and healing.',
+    'Include a source of protein (fish, beans, eggs or lean meat) in most meals to support tissue repair after birth.',
+    'Try not to skip meals, even on busy days. A simple snack like fruit with groundnuts can keep your blood sugar steady.',
+    'Eating foods rich in folate, such as leafy greens and beans, supports blood health and reduces fatigue.',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _startTipCarousel();
+  }
+
+  void _startTipCarousel() {
+    _tipTimer?.cancel();
+    _tipTimer = Timer.periodic(const Duration(seconds: 8), (_) {
+      if (!mounted) return;
+      setState(() {
+        _currentTipIndex =
+            (_currentTipIndex + 1) % _maternalTips.length;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _tipTimer?.cancel();
+    super.dispose();
+  }
+
   Future<void> _onCaptureMeal() async {
     try {
       final picker = ImagePicker();
-      final picked = await picker.pickImage(source: ImageSource.camera);
+      final picked = await picker.pickImage(source: ImageSource.gallery);
       if (picked == null) return;
 
       setState(() {
         _mealPhoto = File(picked.path);
       });
-      showAppToast('Meal photo captured.');
+      showAppToast('Meal photo uploaded.');
     } catch (_) {
       showAppToast('Unable to open camera. Please try again.');
     }
@@ -126,19 +162,41 @@ class _SmartPlateScreenState extends State<SmartPlateScreen> {
       return;
     }
 
+    // Ensure user is signed in before attempting to log meal.
+    if (FirebaseAuth.instance.currentUser == null) {
+      showAppToast('Please sign in again to save your meal.');
+      return;
+    }
+
     setState(() {
       _isSaving = true;
     });
 
-    await Future<void>.delayed(const Duration(milliseconds: 700));
+    try {
+      final service = MealService();
+      await service.logMeal(
+        photo: _mealPhoto!,
+        ingredients: _selectedIngredients,
+      );
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    setState(() {
-      _isSaving = false;
-    });
+      setState(() {
+        _isSaving = false;
+        _mealPhoto = null;
+        _selectedIngredientIds.clear();
+      });
 
-    showAppToast('Meal logged. We\'ll use this to track your nutrition.');
+      showAppToast('Meal logged. We\'ll use this to track your nutrition.');
+    } on MealException catch (e) {
+      if (!mounted) return;
+      setState(() => _isSaving = false);
+      showAppToast(e.message);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isSaving = false);
+      showAppToast('Unable to save meal. Please try again.');
+    }
   }
 
   @override
@@ -205,7 +263,7 @@ class _SmartPlateScreenState extends State<SmartPlateScreen> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Tap to add your meal',
+                                  'Tap to upload your meal',
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     color: Colors.white,
@@ -324,13 +382,21 @@ class _SmartPlateScreenState extends State<SmartPlateScreen> {
                     ),
                   ],
                 ),
-                child: Text(
-                  _selectedIngredientIds.contains('leafy')
-                      ? 'Great choice adding leafy greens – they boost both iron and folate for recovery.'
-                      : 'Try adding leafy greens or beans to your plate for an extra boost of iron and folate.',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey.shade800,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 500),
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    );
+                  },
+                  child: Text(
+                    _maternalTips[_currentTipIndex],
+                    key: ValueKey(_currentTipIndex),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade800,
+                    ),
                   ),
                 ),
               ),
