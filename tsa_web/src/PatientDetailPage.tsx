@@ -1,7 +1,7 @@
 import React from 'react'
 import './dashboard.css'
 import type { TsaPage } from './App'
-import { BellIcon, SettingsIcon } from './TopIcons'
+import { BellIcon } from './TopIcons'
 
 interface PatientDetailPageProps {
   onNavigate: (page: TsaPage) => void
@@ -24,11 +24,9 @@ export const PatientDetailPage: React.FC<PatientDetailPageProps> = ({ onNavigate
               Live Feed
             </button>
             <button className="tsa-nav-item" onClick={() => onNavigate('escalations')}>
-              Escalations
+              Red-flag Alerts
             </button>
-            <button className="tsa-nav-item tsa-nav-item--active">Patient Registry</button>
-            <button className="tsa-nav-item">Triage Alerts</button>
-            <button className="tsa-nav-item">Resources</button>
+            <button className="tsa-nav-item tsa-nav-item--active">Patient Details</button>
           </nav>
         </div>
         <div className="tsa-topbar-right">
@@ -40,11 +38,12 @@ export const PatientDetailPage: React.FC<PatientDetailPageProps> = ({ onNavigate
             />
           </div>
           <div className="tsa-topbar-icons">
-            <button className="tsa-icon-button" aria-label="Notifications">
+            <button
+              className="tsa-icon-button"
+              aria-label="Notifications"
+              onClick={() => onNavigate('notifications')}
+            >
               <BellIcon />
-            </button>
-            <button className="tsa-icon-button" aria-label="Settings">
-              <SettingsIcon />
             </button>
             <div className="tsa-avatar">GH</div>
           </div>

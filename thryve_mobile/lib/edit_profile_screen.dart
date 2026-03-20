@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'mother_profile.dart';
+import 'facility_linkage_screen.dart';
 import 'widgets/app_toast.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -122,6 +123,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'ghanaCardId': updatedProfile.ghanaCardId,
         'primaryLanguage': updatedProfile.primaryLanguage,
         'dateOfBirth': updatedProfile.dateOfBirth,
+        // Keep facility name in sync with whatever is linked in Facility Linkage.
         'linkedFacilityName': updatedProfile.linkedHospitalName,
         'updatedAt': FieldValue.serverTimestamp(),
       });
@@ -129,6 +131,34 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       Navigator.of(context).pop<MotherProfile>(updatedProfile);
     } catch (_) {
       showAppToast('Unable to save your profile. Please try again.');
+    }
+  }
+
+  Future<void> _onChangeFacility() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const FacilityLinkageScreen(),
+      ),
+    );
+
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) return;
+
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .get();
+      final data = doc.data() ?? {};
+      final name = (data['linkedFacilityName'] ?? '') as String;
+
+      if (!mounted) return;
+      setState(() {
+        _hospitalController.text = name.isEmpty ? 'Not linked yet' : name;
+      });
+      showAppToast('Facility updated.');
+    } catch (_) {
+      // Silent – facility linkage screen already handles its own toasts.
     }
   }
 
@@ -247,13 +277,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _hospitalController,
-                  decoration: _fieldDecoration('Linked Hospital / Clinic'),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your hospital or clinic';
-                    }
-                    return null;
-                  },
+                  readOnly: true,
+                  decoration: _fieldDecoration('Linked Facility').copyWith(
+                    suffixIcon: const Icon(Icons.chevron_right_rounded),
+                  ),
+                  onTap: _onChangeFacility,
+                  validator: (_) => null,
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(

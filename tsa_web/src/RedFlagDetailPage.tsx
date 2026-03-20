@@ -1,7 +1,7 @@
 import React from 'react'
 import './dashboard.css'
 import type { TsaPage } from './App'
-import { BellIcon, SettingsIcon } from './TopIcons'
+import { BellIcon } from './TopIcons'
 
 export const RedFlagDetailPage: React.FC<{ onNavigate: (page: TsaPage) => void }> = ({
   onNavigate,
@@ -21,12 +21,12 @@ export const RedFlagDetailPage: React.FC<{ onNavigate: (page: TsaPage) => void }
             <button className="tsa-nav-item" onClick={() => onNavigate('live')}>
               Live Feed
             </button>
-            <button className="tsa-nav-item tsa-nav-item--active" onClick={() => onNavigate('escalations')}>
-              Escalations
+            <button className="tsa-nav-item" onClick={() => onNavigate('escalations')}>
+              Red-flag Alerts
             </button>
-            <button className="tsa-nav-item">Facilities</button>
-            <button className="tsa-nav-item">Patient Records</button>
-            <button className="tsa-nav-item">Reports</button>
+            <button className="tsa-nav-item tsa-nav-item--active" disabled>
+              Patient Details
+            </button>
           </nav>
         </div>
         <div className="tsa-topbar-right">
@@ -38,11 +38,12 @@ export const RedFlagDetailPage: React.FC<{ onNavigate: (page: TsaPage) => void }
             />
           </div>
           <div className="tsa-topbar-icons tsa-topbar-icons--light">
-            <button className="tsa-icon-button tsa-icon-button--light" aria-label="Notifications">
+            <button
+              className="tsa-icon-button tsa-icon-button--light"
+              aria-label="Notifications"
+              onClick={() => onNavigate('notifications')}
+            >
               <BellIcon />
-            </button>
-            <button className="tsa-icon-button tsa-icon-button--light" aria-label="Settings">
-              <SettingsIcon />
             </button>
             <div className="tsa-avatar tsa-avatar--light">GH</div>
           </div>
@@ -173,72 +174,6 @@ export const RedFlagDetailPage: React.FC<{ onNavigate: (page: TsaPage) => void }
                   possible placental abruption. Immediate referral recommended.
                 </p>
               </section>
-            </div>
-          </section>
-        </section>
-
-        <section className="tsa-detail-right">
-          <section className="tsa-card tsa-detail-card tsa-detail-card--protocol">
-            <div className="tsa-detail-protocol-header">
-              <div>
-                <div className="tsa-detail-section-title">GHS Emergency Protocol</div>
-                <div className="tsa-detail-protocol-subtitle">
-                  Follow steps in order for severe bleeding
-                </div>
-              </div>
-            </div>
-
-            <ol className="tsa-protocol-list">
-              <li>
-                <label className="tsa-protocol-item">
-                  <input type="checkbox" />
-                  <span>
-                    Confirm exact GPS location{' '}
-                    <span className="tsa-protocol-meta">Verified &amp; locked, 6° 40' N, 1° 37' W</span>
-                  </span>
-                </label>
-              </li>
-              <li>
-                <label className="tsa-protocol-item">
-                  <input type="checkbox" />
-                  <span>
-                    Assess consciousness level{' '}
-                    <span className="tsa-protocol-meta">Patient alert but disoriented</span>
-                  </span>
-                </label>
-              </li>
-              <li>
-                <label className="tsa-protocol-item">
-                  <input type="checkbox" />
-                  <span>
-                    Check fetal movement{' '}
-                    <span className="tsa-protocol-meta">Ask patient to count movements</span>
-                  </span>
-                </label>
-              </li>
-              <li>
-                <label className="tsa-protocol-item">
-                  <input type="checkbox" />
-                  <span>
-                    Deploy blood bank alert{' '}
-                    <span className="tsa-protocol-meta">Pre-emptively reserve O+ units</span>
-                  </span>
-                </label>
-              </li>
-            </ol>
-
-            <section className="tsa-protocol-warning">
-              <div className="tsa-protocol-warning-title">Protocol Deviation Warning</div>
-              <p className="tsa-protocol-warning-body">
-                One or more steps incomplete. Deviation in a mandatory sub-protocol. Confirm all
-                tasks before dispatch decision.
-              </p>
-            </section>
-
-            <div className="tsa-protocol-map">
-              <div className="tsa-map-placeholder tsa-map-placeholder--mini">
-                <span>Interactive service map placeholder</span>
-              </div>
             </div>
           </section>
         </section>

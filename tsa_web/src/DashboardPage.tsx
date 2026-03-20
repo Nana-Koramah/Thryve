@@ -1,7 +1,7 @@
 import React from 'react'
 import './dashboard.css'
 import type { TsaPage } from './App'
-import { BellIcon, SettingsIcon } from './TopIcons'
+import { BellIcon } from './TopIcons'
 
 const ViewIcon: React.FC = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -64,16 +64,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               className="px-3 py-1.5 rounded-full text-slate-300 hover:bg-slate-800/60 transition"
               onClick={() => onNavigate('escalations')}
             >
-              Escalations
-            </button>
-            <button className="px-3 py-1.5 rounded-full text-slate-300 hover:bg-slate-800/60 transition">
-              Patients
-            </button>
-            <button className="px-3 py-1.5 rounded-full text-slate-300 hover:bg-slate-800/60 transition">
-              Referrals
-            </button>
-            <button className="px-3 py-1.5 rounded-full text-slate-300 hover:bg-slate-800/60 transition">
-              Institutional Reports
+              Red-flag Alerts
             </button>
           </nav>
         </div>
@@ -90,14 +81,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             <button
               className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-slate-50"
               aria-label="Notifications"
+              onClick={() => onNavigate('notifications')}
             >
               <BellIcon />
-            </button>
-            <button
-              className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-slate-50"
-              aria-label="Settings"
-            >
-              <SettingsIcon />
             </button>
             <div className="w-8 h-8 rounded-full bg-tsa-accent-blue text-white flex items-center justify-center text-xs font-semibold">
               GH
@@ -106,7 +92,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         </div>
       </header>
 
-      <main className="flex-1 max-w-6xl mx-auto mt-6 mb-10 px-6 grid grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)] gap-5">
+      <main className="flex-1 flex items-center justify-center px-6 py-8">
+        <div className="max-w-7xl w-full grid grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)] gap-10">
         <section className="flex flex-col gap-5">
           <header className="flex items-center justify-between mb-1">
             <div />
@@ -116,7 +103,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             </div>
           </header>
 
-          <section className="grid grid-cols-3 gap-3">
+          <section className="grid grid-cols-3 gap-6">
             <article className="bg-white rounded-card shadow-card px-4 py-3.5">
               <div className="text-xs text-slate-500">Active Red Flags</div>
               <div className="mt-1 text-2xl font-semibold">12</div>
@@ -314,7 +301,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           </section>
         </section>
 
-        <aside className="flex flex-col gap-4">
+        <aside className="flex flex-col gap-4 mt-25">
           <section className="bg-white rounded-card shadow-card p-4 flex flex-col gap-3">
             <header className="flex items-center justify-between">
               <span className="text-sm font-semibold">Red Flags</span>
@@ -354,17 +341,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 Review Data
               </button>
             </article>
-
-            <div className="mt-3 rounded-card bg-white shadow-card p-3.5">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold">Facility Referral Map</span>
-              </div>
-              <div className="h-28 rounded-xl bg-gradient-to-tr from-blue-100 to-slate-50 flex items-center justify-center text-xs text-slate-600">
-                <span>Map placeholder – referral network</span>
-              </div>
-            </div>
           </section>
         </aside>
+        </div>
       </main>
     </div>
   )

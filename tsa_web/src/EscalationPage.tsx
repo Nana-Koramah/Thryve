@@ -1,7 +1,8 @@
 import React from 'react'
 import './dashboard.css'
 import type { TsaPage } from './App'
-import { BellIcon, SettingsIcon } from './TopIcons'
+import { BellIcon } from './TopIcons'
+import { EscalationMap } from './EscalationMap'
 
 export const EscalationPage: React.FC<{ onNavigate: (page: TsaPage) => void }> = ({
   onNavigate,
@@ -21,10 +22,10 @@ export const EscalationPage: React.FC<{ onNavigate: (page: TsaPage) => void }> =
             <button className="tsa-nav-item" onClick={() => onNavigate('live')}>
               Live Feed
             </button>
-            <button className="tsa-nav-item tsa-nav-item--active">Escalations</button>
-            <button className="tsa-nav-item">Facilities</button>
-            <button className="tsa-nav-item">Patient Records</button>
-            <button className="tsa-nav-item">Reports</button>
+            <button className="tsa-nav-item tsa-nav-item--active">Red-flag Alerts</button>
+            <button className="tsa-nav-item tsa-nav-item--disabled" disabled>
+              Patient Details
+            </button>
           </nav>
         </div>
         <div className="tsa-topbar-right">
@@ -36,11 +37,12 @@ export const EscalationPage: React.FC<{ onNavigate: (page: TsaPage) => void }> =
             />
           </div>
           <div className="tsa-topbar-icons tsa-topbar-icons--light">
-            <button className="tsa-icon-button tsa-icon-button--light" aria-label="Notifications">
+            <button
+              className="tsa-icon-button tsa-icon-button--light"
+              aria-label="Notifications"
+              onClick={() => onNavigate('notifications')}
+            >
               <BellIcon />
-            </button>
-            <button className="tsa-icon-button tsa-icon-button--light" aria-label="Settings">
-              <SettingsIcon />
             </button>
             <div className="tsa-avatar tsa-avatar--light">GH</div>
           </div>
@@ -120,6 +122,45 @@ export const EscalationPage: React.FC<{ onNavigate: (page: TsaPage) => void }> =
                   Manage Case
                 </button>
               </div>
+
+              <div className="tsa-escalation-row">
+                <span className="tsa-patient-id">#GHA-55K9-04</span>
+                <span className="tsa-facility-name">Tema General Hospital</span>
+                <span className="tsa-time-breach tsa-time-breach--critical">51m 03s</span>
+                <span className="tsa-pill tsa-pill--urgent">Critical</span>
+                <button
+                  className="tsa-link-button tsa-link-button--inline"
+                  onClick={() => onNavigate('caseDetail')}
+                >
+                  Manage Case
+                </button>
+              </div>
+
+              <div className="tsa-escalation-row">
+                <span className="tsa-patient-id">#GHA-88L1-72</span>
+                <span className="tsa-facility-name">Cape Coast Teaching Hospital</span>
+                <span className="tsa-time-breach tsa-time-breach--warning">34m 27s</span>
+                <span className="tsa-pill tsa-pill--ppd">High</span>
+                <button
+                  className="tsa-link-button tsa-link-button--inline"
+                  onClick={() => onNavigate('caseDetail')}
+                >
+                  Manage Case
+                </button>
+              </div>
+
+              <div className="tsa-escalation-row">
+                <span className="tsa-patient-id">#GHA-30B4-09</span>
+                <span className="tsa-facility-name">Sunyani Municipal Clinic</span>
+                <span className="tsa-time-breach tsa-time-breach--ok">19m 41s</span>
+                <span className="tsa-pill tsa-pill--stable">Moderate</span>
+                <button
+                  className="tsa-link-button tsa-link-button--inline"
+                  onClick={() => onNavigate('caseDetail')}
+                >
+                  Manage Case
+                </button>
+              </div>
             </div>
           </section>
         </section>
@@ -177,9 +218,7 @@ export const EscalationPage: React.FC<{ onNavigate: (page: TsaPage) => void }> =
           </section>
 
           <section className="tsa-card tsa-escalation-map-card">
-            <div className="tsa-map-placeholder">
-              <span>Map placeholder – active breaches across Accra</span>
-            </div>
+            <EscalationMap />
           </section>
         </aside>
       </main>

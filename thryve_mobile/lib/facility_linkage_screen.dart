@@ -855,13 +855,23 @@ class FirestoreFacilityRepository implements FacilityRepository {
     return snapshot.docs.map((doc) {
       final data = doc.data();
 
+      final geoPoint = data['location'] as GeoPoint?;
+      final latitudeFromGeo = geoPoint?.latitude;
+      final longitudeFromGeo = geoPoint?.longitude;
+
+      final latitudeFromFields = (data['latitude'] as num?)?.toDouble();
+      final longitudeFromFields = (data['longitude'] as num?)?.toDouble();
+
+      final latitude = latitudeFromGeo ?? latitudeFromFields ?? 0;
+      final longitude = longitudeFromGeo ?? longitudeFromFields ?? 0;
+
       return HealthFacility(
         id: doc.id,
         name: (data['name'] ?? '') as String,
         address: (data['district'] ?? '') as String,
         region: (data['region'] ?? '') as String,
-        latitude: (data['latitude'] as num?)?.toDouble() ?? 0,
-        longitude: (data['longitude'] as num?)?.toDouble() ?? 0,
+        latitude: latitude,
+        longitude: longitude,
         // Distance will be refined later when we have location;
         // for now, we just show 0.
         distanceKm: 0,

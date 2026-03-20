@@ -71,6 +71,9 @@ class CheckInService {
     required int totalScore,
     required String riskLevel,
     required List<Map<String, dynamic>> answers,
+    Map<String, File>? questionAudioFiles,
+    String? languageOverride,
+    String? textSummary,
   }) async {
     final user = _auth.currentUser;
     if (user == null) throw CheckInException('You must be signed in to submit.');
@@ -79,8 +82,37 @@ class CheckInService {
     final data = userDoc.data();
     final facilityId = data?['linkedFacilityId'] as String?;
     final facilityName = data?['linkedFacilityName'] as String? ?? '';
-    final language = data?['primaryLanguage'] as String? ?? '';
+    final defaultLanguage = data?['primaryLanguage'] as String? ?? '';
     final fullName = data?['fullName'] as String? ?? '';
+
+    final language = languageOverride ?? defaultLanguage;
+
+    // Upload any per-question audio files and attach their URLs to answers.
+    final List<Map<String, dynamic>> enrichedAnswers = [];
+    for (final answer in answers) {
+      final Map<String, dynamic> enriched = Map<String, dynamic>.from(answer);
+      final id = enriched['id'] as String?;
+      if (id != null &&
+          questionAudioFiles != null &&
+          questionAudioFiles.containsKey(id)) {
+        final file = questionAudioFiles[id]!;
+        if (await file.exists()) {
+          final ref = _storage
+              .ref()
+              .child('users')
+              .child(user.uid)
+              .child('ppd')
+              .child('${id}_${DateTime.now().millisecondsSinceEpoch}.m4a');
+          await ref.putFile(
+            file,
+            SettableMetadata(contentType: 'audio/mp4'),
+          );
+          final url = await ref.getDownloadURL();
+          enriched['audioUrl'] = url;
+        }
+      }
+      enrichedAnswers.add(enriched);
+    }
 
     final now = FieldValue.serverTimestamp();
 
@@ -90,11 +122,13 @@ class CheckInService {
       'facilityName': facilityName,
       'conductedAt': now,
       'totalScore': totalScore,
-      'answers': answers,
+      'answers': enrichedAnswers,
       'riskLevel': riskLevel,
       'language': language,
+      // Top-level audioUrl is no longer used; audio is stored per answer.
       'audioUrl': null,
-      'textSummary': null,
+      'textSummary':
+          textSummary?.trim().isEmpty == true ? null : textSummary?.trim(),
       'createdAt': now,
     });
 

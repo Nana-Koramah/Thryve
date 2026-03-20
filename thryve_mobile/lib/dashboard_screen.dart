@@ -782,23 +782,102 @@ class _MoodCardState extends State<_MoodCard> {
   String _selectedMood = 'Calm';
   late List<double> _currentBars = List<double>.from(_baseBars);
 
+  static const Map<String, double> _moodIntensity = {
+    'Happy': 0.8,
+    'Sad': 0.4,
+    'Anxious': 0.7,
+    'Calm': 0.6,
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMoodHistory();
+  }
+
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  Future<void> _loadMoodHistory() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final start = today.subtract(const Duration(days: 6));
+
+    try {
+      final query = await FirebaseFirestore.instance
+          .collection('moodLogs')
+          .where('userId', isEqualTo: user.uid)
+          .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
+          .orderBy('date')
+          .get();
+
+      final bars = List<double>.filled(7, 0.3);
+      String todayMood = _selectedMood;
+
+      for (final doc in query.docs) {
+        final data = doc.data();
+        final ts = data['date'] as Timestamp?;
+        final mood = (data['mood'] as String?) ?? 'Calm';
+        if (ts == null) continue;
+        final date = ts.toDate();
+        final dayIndex =
+            DateTime(date.year, date.month, date.day).difference(start).inDays;
+        if (dayIndex < 0 || dayIndex > 6) continue;
+        bars[dayIndex] = _moodIntensity[mood] ?? 0.6;
+        if (_isSameDay(date, today)) {
+          todayMood = mood;
+        }
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _currentBars = bars;
+        _selectedMood = todayMood;
+      });
+    } catch (_) {
+      // If anything fails, keep defaults and stay silent.
+    }
+  }
+
+  String _dateKey(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  Future<void> _saveTodayMood(String mood) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final key = _dateKey(today);
+    final docId = '${user.uid}_$key';
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('moodLogs')
+          .doc(docId)
+          .set({
+        'userId': user.uid,
+        'date': Timestamp.fromDate(today),
+        'dateKey': key,
+        'mood': mood,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      await _loadMoodHistory();
+    } catch (_) {
+      // For now, fail silently – we still update the local UI.
+    }
+  }
+
   void _onMoodSelected(String mood) {
     setState(() {
       _selectedMood = mood;
-      switch (mood) {
-        case 'Happy':
-          _currentBars = [0.7, 0.8, 0.9, 0.85, 0.9, 0.75, 0.8];
-          break;
-        case 'Sad':
-          _currentBars = [0.3, 0.4, 0.35, 0.3, 0.45, 0.4, 0.35];
-          break;
-        case 'Anxious':
-          _currentBars = [0.5, 0.6, 0.4, 0.7, 0.5, 0.65, 0.55];
-          break;
-        default:
-          _currentBars = List<double>.from(_baseBars);
-      }
     });
+    _saveTodayMood(mood);
   }
 
   @override

@@ -67,6 +67,8 @@ class _SmartPlateScreenState extends State<SmartPlateScreen> {
   int _currentTipIndex = 0;
   Timer? _tipTimer;
 
+  static const double _dailyCarbTargetGrams = 250;
+  static const double _dailyProteinTargetGrams = 75;
   static const double _dailyIronTargetMg = 15; // simple placeholder
   static const double _dailyFolateTargetMcg = 400;
 
@@ -130,6 +132,9 @@ class _SmartPlateScreenState extends State<SmartPlateScreen> {
         (ingredient) => _selectedIngredientIds.contains(ingredient.id),
       );
 
+  double get _totalCarbsGrams =>
+      _selectedIngredients.fold(0, (sum, item) => sum + item.carbsGrams);
+
   double get _totalProteinGrams =>
       _selectedIngredients.fold(0, (sum, item) => sum + item.proteinGrams);
 
@@ -138,6 +143,18 @@ class _SmartPlateScreenState extends State<SmartPlateScreen> {
 
   double get _totalFolateMcg =>
       _selectedIngredients.fold(0, (sum, item) => sum + item.folateMcg);
+
+  double get _carbPercent =>
+      ((_dailyCarbTargetGrams == 0 ? 0 : _totalCarbsGrams / _dailyCarbTargetGrams)
+              .clamp(0, 1))
+          .toDouble();
+
+  double get _proteinPercent =>
+      ((_dailyProteinTargetGrams == 0
+                  ? 0
+                  : _totalProteinGrams / _dailyProteinTargetGrams)
+              .clamp(0, 1))
+          .toDouble();
 
   double get _ironPercent =>
       ((_dailyIronTargetMg == 0 ? 0 : _totalIronMg / _dailyIronTargetMg)
@@ -319,6 +336,26 @@ class _SmartPlateScreenState extends State<SmartPlateScreen> {
                 ),
               ),
               const SizedBox(height: 20),
+              _NutrientCard(
+                title: 'Carbohydrates',
+                percentage: _carbPercent,
+                currentLabel:
+                    '${_totalCarbsGrams.toStringAsFixed(1)} g attained',
+                goalLabel:
+                    '${_dailyCarbTargetGrams.toStringAsFixed(0)} g goal',
+                barColor: const Color(0xFFF97316),
+              ),
+              const SizedBox(height: 12),
+              _NutrientCard(
+                title: 'Protein',
+                percentage: _proteinPercent,
+                currentLabel:
+                    '${_totalProteinGrams.toStringAsFixed(1)} g attained',
+                goalLabel:
+                    '${_dailyProteinTargetGrams.toStringAsFixed(0)} g goal',
+                barColor: const Color(0xFF22C55E),
+              ),
+              const SizedBox(height: 12),
               _NutrientCard(
                 title: 'Iron Level',
                 percentage: _ironPercent,
