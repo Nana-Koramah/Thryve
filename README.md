@@ -38,3 +38,6 @@ https://www.figma.com/design/0x3eVfOzYTzqDmy4yiiBB6/Untitled?node-id=0-1&t=xA6bt
 
 #### Figma designs walkthrough
 https://drive.google.com/drive/folders/1vcMV3EkcKF6X9ZW-gijzU6eCLTcFM7zt?usp=drive_link 
+
+#### Final product Implementation video
+https://drive.google.com/drive/folders/11Q8AwsoNu76ijX3J_GPqw2SLyVQVuK1Q?usp=sharing 
