@@ -1,55 +1,13 @@
 import React from 'react'
 import './dashboard.css'
 import type { TsaPage } from './App'
-import { BellIcon } from './TopIcons'
+import { TsaLayout } from './TsaLayout'
 
 export const RedFlagDetailPage: React.FC<{ onNavigate: (page: TsaPage) => void }> = ({
   onNavigate,
 }) => {
   return (
-    <div className="tsa-root">
-      <header className="tsa-topbar tsa-topbar--light">
-        <div className="tsa-topbar-left">
-          <div className="tsa-logo tsa-logo--light">
-            <img
-              src="/thryve _logo.png"
-              alt="Thryve System Analytics"
-              className="tsa-logo-image"
-            />
-          </div>
-          <nav className="tsa-nav tsa-nav--light">
-            <button className="tsa-nav-item" onClick={() => onNavigate('live')}>
-              Live Feed
-            </button>
-            <button className="tsa-nav-item" onClick={() => onNavigate('escalations')}>
-              Red-flag Alerts
-            </button>
-            <button className="tsa-nav-item tsa-nav-item--active" disabled>
-              Patient Details
-            </button>
-          </nav>
-        </div>
-        <div className="tsa-topbar-right">
-          <div className="tsa-search tsa-search--light">
-            <input
-              type="text"
-              placeholder="Search Patient ID or Name"
-              aria-label="Search Patient ID or Name"
-            />
-          </div>
-          <div className="tsa-topbar-icons tsa-topbar-icons--light">
-            <button
-              className="tsa-icon-button tsa-icon-button--light"
-              aria-label="Notifications"
-              onClick={() => onNavigate('notifications')}
-            >
-              <BellIcon />
-            </button>
-            <div className="tsa-avatar tsa-avatar--light">GH</div>
-          </div>
-        </div>
-      </header>
-
+    <TsaLayout navContext="caseDetail" onNavigate={onNavigate}>
       <main className="tsa-main tsa-main--detail">
         <section className="tsa-detail-left">
           <button
@@ -194,7 +152,7 @@ export const RedFlagDetailPage: React.FC<{ onNavigate: (page: TsaPage) => void }
           </div>
         </section>
       </main>
-    </div>
+    </TsaLayout>
   )
 }
 

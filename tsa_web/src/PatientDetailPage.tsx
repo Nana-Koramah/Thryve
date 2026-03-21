@@ -1,7 +1,7 @@
 import React from 'react'
 import './dashboard.css'
 import type { TsaPage } from './App'
-import { BellIcon } from './TopIcons'
+import { TsaLayout } from './TsaLayout'
 
 interface PatientDetailPageProps {
   onNavigate: (page: TsaPage) => void
@@ -9,47 +9,7 @@ interface PatientDetailPageProps {
 
 export const PatientDetailPage: React.FC<PatientDetailPageProps> = ({ onNavigate }) => {
   return (
-    <div className="tsa-root">
-      <header className="tsa-topbar">
-        <div className="tsa-topbar-left">
-          <div className="tsa-logo">
-            <img
-              src="/thryve _logo.png"
-              alt="Thryve System Analytics"
-              className="tsa-logo-image"
-            />
-          </div>
-          <nav className="tsa-nav">
-            <button className="tsa-nav-item" onClick={() => onNavigate('live')}>
-              Live Feed
-            </button>
-            <button className="tsa-nav-item" onClick={() => onNavigate('escalations')}>
-              Red-flag Alerts
-            </button>
-            <button className="tsa-nav-item tsa-nav-item--active">Patient Details</button>
-          </nav>
-        </div>
-        <div className="tsa-topbar-right">
-          <div className="tsa-search">
-            <input
-              type="text"
-              placeholder="Search Patient ID or Name"
-              aria-label="Search Patient ID or Name"
-            />
-          </div>
-          <div className="tsa-topbar-icons">
-            <button
-              className="tsa-icon-button"
-              aria-label="Notifications"
-              onClick={() => onNavigate('notifications')}
-            >
-              <BellIcon />
-            </button>
-            <div className="tsa-avatar">GH</div>
-          </div>
-        </div>
-      </header>
-
+    <TsaLayout navContext="patientDetail" onNavigate={onNavigate}>
       <main className="tsa-main tsa-main--patient-detail">
         <section className="tsa-patient-detail-left">
           <header className="tsa-patient-detail-header">
@@ -205,7 +165,7 @@ export const PatientDetailPage: React.FC<PatientDetailPageProps> = ({ onNavigate
           </section>
         </aside>
       </main>
-    </div>
+    </TsaLayout>
   )
 }
 

@@ -1,7 +1,7 @@
 import React from 'react'
 import './dashboard.css'
 import type { TsaPage } from './App'
-import { BellIcon } from './TopIcons'
+import { TsaLayout } from './TsaLayout'
 
 const ViewIcon: React.FC = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -46,63 +46,10 @@ interface DashboardPageProps {
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
   return (
-    <div className="min-h-screen bg-tsa-surface text-slate-900 flex flex-col">
-      <header className="h-14 px-6 bg-tsa-navy text-slate-50 flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <img
-              src="/thryve _logo.png"
-              alt="Thryve System Analytics"
-              className="h-6"
-            />
-          </div>
-          <nav className="flex items-center gap-2 text-xs">
-            <button className="px-3 py-1.5 rounded-full bg-slate-900 text-slate-50 font-medium">
-              Live Feed
-            </button>
-            <button
-              className="px-3 py-1.5 rounded-full text-slate-300 hover:bg-slate-800/60 transition"
-              onClick={() => onNavigate('escalations')}
-            >
-              Red-flag Alerts
-            </button>
-          </nav>
-        </div>
-        <div className="flex items-center gap-4">
-          <div>
-            <input
-              type="text"
-              placeholder="Search Patient ID or Name"
-              aria-label="Search Patient ID or Name"
-              className="w-64 px-3 py-1.5 rounded-full border border-slate-200 bg-white text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-tsa-accent-blue/40"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-slate-50"
-              aria-label="Notifications"
-              onClick={() => onNavigate('notifications')}
-            >
-              <BellIcon />
-            </button>
-            <div className="w-8 h-8 rounded-full bg-tsa-accent-blue text-white flex items-center justify-center text-xs font-semibold">
-              GH
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="flex-1 flex items-center justify-center px-6 py-8">
+    <TsaLayout navContext="live" onNavigate={onNavigate}>
+      <main className="px-6 py-8">
         <div className="max-w-7xl w-full grid grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)] gap-10">
         <section className="flex flex-col gap-5">
-          <header className="flex items-center justify-between mb-1">
-            <div />
-            <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span>System Active</span>
-            </div>
-          </header>
-
           <section className="grid grid-cols-3 gap-6">
             <article className="bg-white rounded-card shadow-card px-4 py-3.5">
               <div className="text-xs text-slate-500">Active Red Flags</div>
@@ -301,7 +248,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           </section>
         </section>
 
-        <aside className="flex flex-col gap-4 mt-25">
+        <aside className="flex flex-col gap-4">
           <section className="bg-white rounded-card shadow-card p-4 flex flex-col gap-3">
             <header className="flex items-center justify-between">
               <span className="text-sm font-semibold">Red Flags</span>
@@ -345,7 +292,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         </aside>
         </div>
       </main>
-    </div>
+    </TsaLayout>
   )
 }
 

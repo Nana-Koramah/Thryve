@@ -4,8 +4,15 @@ import { EscalationPage } from './EscalationPage'
 import { RedFlagDetailPage } from './RedFlagDetailPage'
 import { PatientDetailPage } from './PatientDetailPage'
 import { NotificationsPage } from './NotificationsPage'
+import { ProfilePage } from './ProfilePage'
 
-export type TsaPage = 'live' | 'escalations' | 'caseDetail' | 'patientDetail' | 'notifications'
+export type TsaPage =
+  | 'live'
+  | 'escalations'
+  | 'caseDetail'
+  | 'patientDetail'
+  | 'notifications'
+  | 'profile'
 
 export const App: React.FC = () => {
   const [page, setPage] = useState<TsaPage>('live')
@@ -24,6 +31,10 @@ export const App: React.FC = () => {
 
   if (page === 'notifications') {
     return <NotificationsPage onNavigate={setPage} />
+  }
+
+  if (page === 'profile') {
+    return <ProfilePage onNavigate={setPage} />
   }
 
   return <DashboardPage onNavigate={setPage} />

@@ -1,7 +1,7 @@
 import React from 'react'
 import './dashboard.css'
 import type { TsaPage } from './App'
-import { BellIcon } from './TopIcons'
+import { TsaLayout } from './TsaLayout'
 
 /** Dummy notifications for doctors */
 const NOTIFICATIONS = [
@@ -59,48 +59,7 @@ export const NotificationsPage: React.FC<{ onNavigate: (page: TsaPage) => void }
   onNavigate,
 }) => {
   return (
-    <div className="tsa-root">
-      <header className="tsa-topbar tsa-topbar--light">
-        <div className="tsa-topbar-left">
-          <div className="tsa-logo tsa-logo--light">
-            <img
-              src="/thryve _logo.png"
-              alt="Thryve System Analytics"
-              className="tsa-logo-image"
-            />
-          </div>
-          <nav className="tsa-nav tsa-nav--light">
-            <button className="tsa-nav-item" onClick={() => onNavigate('live')}>
-              Live Feed
-            </button>
-            <button className="tsa-nav-item" onClick={() => onNavigate('escalations')}>
-              Red-flag Alerts
-            </button>
-            <button className="tsa-nav-item tsa-nav-item--disabled" disabled>
-              Patient Details
-            </button>
-          </nav>
-        </div>
-        <div className="tsa-topbar-right">
-          <div className="tsa-search tsa-search--light">
-            <input
-              type="text"
-              placeholder="Search Patient ID or Name"
-              aria-label="Search Patient ID or Name"
-            />
-          </div>
-          <div className="tsa-topbar-icons tsa-topbar-icons--light">
-            <button
-              className="tsa-icon-button tsa-icon-button--light tsa-icon-button--active"
-              aria-label="Notifications"
-            >
-              <BellIcon />
-            </button>
-            <div className="tsa-avatar tsa-avatar--light">GH</div>
-          </div>
-        </div>
-      </header>
-
+    <TsaLayout navContext="notifications" onNavigate={onNavigate}>
       <main className="tsa-main tsa-main--notifications">
         <section className="tsa-card tsa-notifications-card">
           <header className="tsa-notifications-header">
@@ -127,6 +86,6 @@ export const NotificationsPage: React.FC<{ onNavigate: (page: TsaPage) => void }
           </ul>
         </section>
       </main>
-    </div>
+    </TsaLayout>
   )
 }
