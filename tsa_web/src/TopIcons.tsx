@@ -1,22 +1,24 @@
 import React from 'react'
 
-export const BellIcon: React.FC = () => (
+/** Header control: open facility alert history (all alert types). */
+export const AlertHistoryIcon: React.FC = () => (
   <svg
     width="16"
     height="16"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    aria-hidden
   >
     <path
-      d="M12 3C9.79 3 8 4.79 8 7V9.17C8 9.7 7.79 10.21 7.41 10.59L6.12 11.88C5.53 12.47 5.95 13.5 6.79 13.5H17.21C18.05 13.5 18.47 12.47 17.88 11.88L16.59 10.59C16.21 10.21 16 9.7 16 9.17V7C16 4.79 14.21 3 12 3Z"
+      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"
       stroke="currentColor"
       strokeWidth="1.6"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
-      d="M10 16C10.3 16.6 10.91 17 11.6 17H12.4C13.09 17 13.7 16.6 14 16"
+      d="M9 5a2 2 0 012-2h2a2 2 0 012 2v0a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM9 12h6M9 16h4"
       stroke="currentColor"
       strokeWidth="1.6"
       strokeLinecap="round"

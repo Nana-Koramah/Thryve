@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'signup_step_one.dart';
+import 'user_home_geo_service.dart';
 
 class ApiException implements Exception {
   final String message;
@@ -18,8 +19,10 @@ class ApiService {
   Future<void> registerUser({
     required SignUpData signUpData,
     required String ghanaCardId,
+    required String nhisId,
     required String heightCm,
     required String weightKg,
+    String homeAddress = '',
     File? ghanaCardImage,
   }) async {
     final auth = FirebaseAuth.instance;
@@ -47,11 +50,12 @@ class ApiService {
 
       final now = FieldValue.serverTimestamp();
 
-      await firestore.collection('users').doc(uid).set({
+      final userData = <String, dynamic>{
         'fullName': signUpData.fullName.trim(),
         'email': trimmedEmail,
         'phone': trimmedPhone,
         'ghanaCardId': ghanaCardId.trim(),
+        'NhisId': nhisId.trim(),
         'primaryLanguage': '',
         'dateOfBirth': '',
         'linkedFacilityId': null,
@@ -62,9 +66,22 @@ class ApiService {
         'postpartumDuration': signUpData.postpartumDuration.trim(),
         'heightCm': heightCm.trim(),
         'weightKg': weightKg.trim(),
+        'homeAddress': homeAddress.trim(),
         'createdAt': now,
         'updatedAt': now,
-      });
+      };
+
+      if (homeAddress.trim().isNotEmpty) {
+        try {
+          final geoPatch =
+              await UserHomeGeoService.buildGeoPatch(homeAddress.trim());
+          userData.addAll(geoPatch.fields);
+        } catch (_) {
+          // Sign-up still succeeds; mother can save profile again to geocode.
+        }
+      }
+
+      await firestore.collection('users').doc(uid).set(userData);
 
       // Ghana card image upload will be added later when we wire Storage.
     } on FirebaseAuthException catch (e) {

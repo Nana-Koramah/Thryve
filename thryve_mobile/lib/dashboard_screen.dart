@@ -12,6 +12,7 @@ import 'widgets/app_toast.dart';
 import 'smart_plate_screen.dart';
 import 'check_in_screen.dart';
 import 'facility_linkage_screen.dart';
+import 'sign_in_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key, this.initialIndex = 0});
@@ -29,6 +30,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     email: 'abena@example.com',
     phoneNumber: '+233 24 123 4567',
     ghanaCardId: 'GHA-123456789-0',
+    nhisId: '',
     linkedHospitalName: 'Korle-Bu Teaching Hospital',
     primaryLanguage: 'Twi',
     dateOfBirth: '12th June 1995',
@@ -101,9 +103,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         email: (data['email'] ?? '') as String,
         phoneNumber: (data['phone'] ?? '') as String,
         ghanaCardId: (data['ghanaCardId'] ?? '') as String,
+        nhisId: (data['NhisId'] is String ? data['NhisId'] as String : ''),
         linkedHospitalName: (data['linkedFacilityName'] ?? 'Not linked yet') as String,
         primaryLanguage: (data['primaryLanguage'] ?? '') as String,
         dateOfBirth: (data['dateOfBirth'] ?? '') as String,
+        homeAddress: (data['homeAddress'] is String ? data['homeAddress'] as String : ''),
         profilePhotoPath: (data['profilePhotoUrl'] ?? '') as String,
       );
 
@@ -357,6 +361,22 @@ class _ProfileTab extends StatelessWidget {
     }
   }
 
+  Future<void> _onLogout(BuildContext context) async {
+    final navigator = Navigator.of(context);
+    try {
+      await FirebaseAuth.instance.signOut();
+      if (!context.mounted) return;
+      navigator.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const SignInScreen()),
+        (_) => false,
+      );
+    } catch (_) {
+      if (context.mounted) {
+        showAppToast('Could not sign out. Try again.');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -409,20 +429,43 @@ class _ProfileTab extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    profile.ghanaCardId,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade800,
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        profile.ghanaCardId,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
                     ),
-                  ),
+                    if (profile.nhisId.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          'NHIS: ${profile.nhisId}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.blue.shade900,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ],
             ),
@@ -488,6 +531,14 @@ class _ProfileTab extends StatelessWidget {
                   label: 'Primary Language',
                   value: profile.primaryLanguage,
                 ),
+                const SizedBox(height: 12),
+                _ProfileInfoRow(
+                  icon: Icons.home_work_rounded,
+                  label: 'Home address (optional)',
+                  value: profile.homeAddress.isEmpty
+                      ? 'Not shared — tap Edit Profile to add'
+                      : profile.homeAddress,
+                ),
               ],
             ),
           ),
@@ -524,6 +575,12 @@ class _ProfileTab extends StatelessWidget {
                     label: 'Linked Facility',
                     value: profile.linkedHospitalName,
                   ),
+                ),
+                const SizedBox(height: 12),
+                _ProfileInfoRow(
+                  icon: Icons.health_and_safety_rounded,
+                  label: 'NHIS number',
+                  value: profile.nhisId.isEmpty ? 'Not set — tap Edit Profile' : profile.nhisId,
                 ),
                 const SizedBox(height: 12),
                 _ProfileInfoRow(
@@ -581,6 +638,24 @@ class _ProfileTab extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 20),
+          Center(
+            child: TextButton.icon(
+              onPressed: () => _onLogout(context),
+              icon: Icon(
+                Icons.logout_rounded,
+                size: 20,
+                color: colorScheme.secondary,
+              ),
+              label: Text(
+                'Log out',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.secondary,
+                ),
+              ),
+            ),
           ),
         ],
       ),

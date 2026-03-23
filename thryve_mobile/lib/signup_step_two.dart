@@ -1,7 +1,4 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 
 import 'api_service.dart';
 import 'signup_step_one.dart';
@@ -20,35 +17,21 @@ class SignUpStepTwoScreen extends StatefulWidget {
 class _SignUpStepTwoScreenState extends State<SignUpStepTwoScreen> {
   final _formKey = GlobalKey<FormState>();
   final _ghanaCardController = TextEditingController();
+  final _nhisIdController = TextEditingController();
   final _heightController = TextEditingController();
   final _weightController = TextEditingController();
+  final _homeAddressController = TextEditingController();
   final _apiService = ApiService();
-  File? _ghanaCardImage;
   bool _isSubmitting = false;
 
   @override
   void dispose() {
     _ghanaCardController.dispose();
+    _nhisIdController.dispose();
     _heightController.dispose();
     _weightController.dispose();
+    _homeAddressController.dispose();
     super.dispose();
-  }
-
-  Future<void> _onScanCard() async {
-    try {
-      final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(
-        source: ImageSource.camera,
-      );
-
-      if (pickedFile == null) return;
-
-      setState(() {
-        _ghanaCardImage = File(pickedFile.path);
-      });
-    } catch (e) {
-      showAppToast('Unable to open camera. Please try again.');
-    }
   }
 
   Future<void> _onSubmit() async {
@@ -64,9 +47,10 @@ class _SignUpStepTwoScreenState extends State<SignUpStepTwoScreen> {
       await _apiService.registerUser(
         signUpData: widget.signUpData,
         ghanaCardId: _ghanaCardController.text.trim(),
+        nhisId: _nhisIdController.text.trim(),
         heightCm: _heightController.text.trim(),
         weightKg: _weightController.text.trim(),
-        ghanaCardImage: _ghanaCardImage,
+        homeAddress: _homeAddressController.text.trim(),
       );
 
       if (!mounted) return;
@@ -177,70 +161,56 @@ class _SignUpStepTwoScreenState extends State<SignUpStepTwoScreen> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                controller: _ghanaCardController,
-                                decoration: _fieldDecoration(
-                                  'GHA-000000000-0',
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Please enter your Ghana Card ID';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            InkWell(
-                              onTap: _onScanCard,
-                              borderRadius: BorderRadius.circular(16),
-                              child: Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: colorScheme.primary.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: _ghanaCardImage == null
-                                    ? Icon(
-                                        Icons.camera_alt_rounded,
-                                        color: colorScheme.primary,
-                                      )
-                                    : ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(12),
-                                        child: Image.file(
-                                          _ghanaCardImage!,
-                                          width: 32,
-                                          height: 32,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                              ),
-                            ),
-                          ],
+                        TextFormField(
+                          controller: _ghanaCardController,
+                          keyboardType: TextInputType.text,
+                          decoration: _fieldDecoration(
+                            'GHA-000000000-0',
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Please enter your Ghana Card ID';
+                            }
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              size: 16,
-                              color: colorScheme.primary,
-                            ),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                'Scan your card for automatic data entry',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: colorScheme.primary,
-                                ),
-                              ),
-                            ),
-                          ],
+                        Text(
+                          'Type the ID exactly as it appears on your Ghana Card (e.g. GHA-XXXXXXXXX-X).',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'NHIS number',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _nhisIdController,
+                          keyboardType: TextInputType.text,
+                          decoration: _fieldDecoration(
+                            'National Health Insurance ID',
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Please enter your NHIS number';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Enter the number on your NHIS card. Staff may verify it when you link your facility.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
                         ),
                         const SizedBox(height: 24),
                         Text(
@@ -283,6 +253,34 @@ class _SignUpStepTwoScreenState extends State<SignUpStepTwoScreen> {
                             }
                             return null;
                           },
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Home address (optional)',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _homeAddressController,
+                          keyboardType: TextInputType.streetAddress,
+                          textCapitalization: TextCapitalization.sentences,
+                          maxLines: 3,
+                          decoration: _fieldDecoration(
+                            'Street, area, city',
+                            hint:
+                                'Only if you’re comfortable sharing — helps staff reach you for urgent alerts',
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Totally optional. We may use this only for severe red-flag follow-up.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
                         ),
                         const SizedBox(height: 32),
                         SizedBox(

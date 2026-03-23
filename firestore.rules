@@ -2,10 +2,76 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Mothers' profiles – read/update own only; create at signup
+    function staffDocPath() {
+      return /databases/$(database)/documents/staff/$(request.auth.uid);
+    }
+
+    function staffFacilityId() {
+      return get(staffDocPath()).data.facilityId;
+    }
+
+    /** Staff may read a patient's clinical docs when that user is linked to the same facility. */
+    function isStaffAtSameFacilityAsPatient(patientUserId) {
+      return request.auth != null &&
+        exists(staffDocPath()) &&
+        staffFacilityId() is string &&
+        exists(/databases/$(database)/documents/users/$(patientUserId)) &&
+        'linkedFacilityId' in get(/databases/$(database)/documents/users/$(patientUserId)).data &&
+        get(/databases/$(database)/documents/users/$(patientUserId)).data.linkedFacilityId == staffFacilityId();
+    }
+
+    // Mothers' profiles – read/update own; staff at same facility can read (for TSA Live Feed)
     match /users/{uid} {
-      allow read, update: if request.auth != null && request.auth.uid == uid;
+      allow read: if request.auth != null && (
+        request.auth.uid == uid ||
+        (
+          exists(/databases/$(database)/documents/staff/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/staff/$(request.auth.uid)).data.facilityId is string &&
+          'linkedFacilityId' in resource.data &&
+          resource.data.linkedFacilityId is string &&
+          resource.data.linkedFacilityId ==
+            get(/databases/$(database)/documents/staff/$(request.auth.uid)).data.facilityId
+        )
+      );
+      // Mother: full profile. Staff at patient's current facility: referral handoff (facility link only).
+      allow update: if request.auth != null && (
+        request.auth.uid == uid ||
+        (
+          exists(staffDocPath()) &&
+          staffFacilityId() is string &&
+          'linkedFacilityId' in resource.data &&
+          resource.data.linkedFacilityId is string &&
+          resource.data.linkedFacilityId == staffFacilityId() &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['linkedFacilityId', 'linkedFacilityName', 'updatedAt'])
+        )
+      );
       allow create: if request.auth != null;
+    }
+
+    // Facility referrals – audit + clinical handoff; created by sending-facility staff
+    // Read: patient owns their rows; staff may read ALL referrals for a mother only while she is
+    // linked to their facility (so queries by patientId succeed for full history — rules are not filters).
+    match /patientReferrals/{refId} {
+      allow read: if request.auth != null &&
+        'patientId' in resource.data &&
+        resource.data.patientId is string &&
+        (
+          resource.data.patientId == request.auth.uid ||
+          isStaffAtSameFacilityAsPatient(resource.data.patientId)
+        );
+      allow create: if request.auth != null &&
+        exists(staffDocPath()) &&
+        staffFacilityId() is string &&
+        request.resource.data.patientId is string &&
+        request.resource.data.previousFacilityId == staffFacilityId() &&
+        request.resource.data.previousFacilityName is string &&
+        request.resource.data.newFacilityId is string &&
+        request.resource.data.newFacilityName is string &&
+        request.resource.data.referredByStaffId == request.auth.uid &&
+        exists(/databases/$(database)/documents/users/$(request.resource.data.patientId)) &&
+        get(/databases/$(database)/documents/users/$(request.resource.data.patientId)).data.linkedFacilityId == staffFacilityId();
+      allow update, delete: if false;
     }
 
     // Facilities – public read (needed for staff sign-up + mother facility linkage); no client write
@@ -14,17 +80,23 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Check-ins – mothers create and read own only
+    // Check-ins – mothers create and read own; staff at same facility as patient can read (TSA)
     match /checkIns/{docId} {
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && (
+        resource.data.userId == request.auth.uid ||
+        isStaffAtSameFacilityAsPatient(resource.data.userId)
+      );
       allow update, delete: if false;
     }
 
-    // PPD screenings – mothers create and read own only
+    // PPD screenings – mothers create and read own; staff at same facility can read (TSA)
     match /ppdScreenings/{docId} {
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && (
+        resource.data.userId == request.auth.uid ||
+        isStaffAtSameFacilityAsPatient(resource.data.userId)
+      );
       allow update, delete: if false;
     }
 
@@ -61,17 +133,45 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // Meals – mothers create and read their own meals
+    // Meals – mothers create/read own; staff at same facility can read (TSA)
     match /meals/{mealId} {
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && (
+        resource.data.userId == request.auth.uid ||
+        isStaffAtSameFacilityAsPatient(resource.data.userId)
+      );
       allow update, delete: if false;
     }
 
-    // Mood logs – mothers create and read their own daily mood entries
+    // Mood logs – mothers create and read own; staff at same facility can read (TSA)
     match /moodLogs/{logId} {
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && (
+        resource.data.userId == request.auth.uid ||
+        isStaffAtSameFacilityAsPatient(resource.data.userId)
+      );
+      allow update, delete: if false;
+    }
+
+    // Clinical notes – staff-only; not exposed to mothers in the app rules below.
+    // Reads: query is by patientId, so every matching doc must pass — include notes recorded at
+    // *other* facilities once the patient is under your care (same pattern as patientReferrals).
+    match /clinicalNotes/{noteId} {
+      allow read: if request.auth != null &&
+        exists(staffDocPath()) &&
+        staffFacilityId() is string &&
+        resource.data.patientId is string &&
+        isStaffAtSameFacilityAsPatient(resource.data.patientId);
+
+      allow create: if request.auth != null &&
+        exists(staffDocPath()) &&
+        staffFacilityId() is string &&
+        request.resource.data.patientId is string &&
+        request.resource.data.facilityId == staffFacilityId() &&
+        request.resource.data.authorId == request.auth.uid &&
+        request.resource.data.content is string &&
+        isStaffAtSameFacilityAsPatient(request.resource.data.patientId);
+
       allow update, delete: if false;
     }
 

@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import { DEFAULT_MAP_CENTER } from './useFacilityLocation'
 
-// Fix default marker icons in Vite/bundlers (use string paths for compatibility)
 const DefaultIcon = L.icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -15,34 +15,47 @@ const DefaultIcon = L.icon({
 })
 L.Marker.prototype.options.icon = DefaultIcon
 
-/** Dummy red-flag alert locations in Greater Accra */
-const ALERT_LOCATIONS = [
-  { id: '1', lat: 5.5667, lng: -0.2, label: 'Adabraka PolyClinic', priority: 'Critical' },
-  { id: '2', lat: 5.581, lng: -0.195, label: 'Ridge Hospital Annex', priority: 'High' },
-  { id: '3', lat: 5.5431, lng: -0.2133, label: 'Korle-Bu District Center', priority: 'Borderline' },
-  { id: '4', lat: 5.6698, lng: -0.0167, label: 'Tema General Hospital', priority: 'Critical' },
-  { id: '5', lat: 5.65, lng: -0.15, label: 'East Legon CHPS', priority: 'High' },
-  { id: '6', lat: 5.555, lng: -0.205, label: 'Osu Maternity Home', priority: 'Moderate' },
-]
+export type EscalationMapMarker = {
+  id: string
+  lat: number
+  lng: number
+  title: string
+  summary: string
+  priority: string
+  typeShort: string
+}
 
-const GREATER_ACCRA_CENTER: [number, number] = [5.6037, -0.187]
-
-function MapBounds() {
+function MapBounds({ markers }: { markers: EscalationMapMarker[] }) {
   const map = useMap()
   useEffect(() => {
-    const b = L.latLngBounds(ALERT_LOCATIONS.map((a) => [a.lat, a.lng] as L.LatLngTuple))
-    b.pad(0.15)
-    map.fitBounds(b, { maxZoom: 11 })
-  }, [map])
+    if (markers.length === 0) {
+      map.setView(DEFAULT_MAP_CENTER, 11)
+      return
+    }
+    const b = L.latLngBounds(markers.map((m) => [m.lat, m.lng] as L.LatLngTuple))
+    b.pad(0.2)
+    map.fitBounds(b, { maxZoom: 13, padding: [24, 24] })
+  }, [map, markers])
   return null
 }
 
-export const EscalationMap: React.FC = () => {
+export const EscalationMap: React.FC<{
+  markers: EscalationMapMarker[]
+  /** Shown when there are no alert markers. */
+  facilityLabel?: string
+}> = ({ markers, facilityLabel }) => {
+  const center = useMemo((): [number, number] => {
+    if (markers.length === 0) return DEFAULT_MAP_CENTER
+    const lat = markers.reduce((s, m) => s + m.lat, 0) / markers.length
+    const lng = markers.reduce((s, m) => s + m.lng, 0) / markers.length
+    return [lat, lng]
+  }, [markers])
+
   return (
     <div className="tsa-escalation-map-wrap">
       <MapContainer
-        center={GREATER_ACCRA_CENTER}
-        zoom={10}
+        center={center}
+        zoom={markers.length === 0 ? 11 : 12}
         className="tsa-escalation-map"
         scrollWheelZoom={true}
       >
@@ -50,17 +63,27 @@ export const EscalationMap: React.FC = () => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <MapBounds />
-        {ALERT_LOCATIONS.map((loc) => (
+        <MapBounds markers={markers} />
+        {markers.map((loc) => (
           <Marker key={loc.id} position={[loc.lat, loc.lng]}>
             <Popup>
-              <strong>{loc.label}</strong>
-              <br />
-              <span className="tsa-map-popup-priority">{loc.priority}</span>
+              <strong>{loc.title}</strong>
+              <div className="text-xs mt-1 opacity-90">{loc.typeShort}</div>
+              <div className="text-xs mt-1">{loc.summary}</div>
+              <div className="tsa-map-popup-priority mt-1">{loc.priority}</div>
             </Popup>
           </Marker>
         ))}
       </MapContainer>
+      {markers.length === 0 ? (
+        <div className="pointer-events-none absolute inset-0 z-[500] flex items-end justify-center pb-3 px-2">
+          <p className="text-xs text-slate-700 bg-white/90 rounded-lg px-2 py-1 shadow-sm text-center max-w-[90%]">
+            {facilityLabel
+              ? `No open alerts to plot. Pins use your facility location (${facilityLabel}) when alerts exist.`
+              : 'No alerts to show on the map yet.'}
+          </p>
+        </div>
+      ) : null}
     </div>
   )
 }

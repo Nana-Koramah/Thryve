@@ -20,6 +20,7 @@ export function useStaffWelcome(): {
   displayName: string
   email: string
   facilityName: string
+  facilityId: string
   accessLevel: string
   profilePhotoUrl: string
 } {
@@ -30,6 +31,7 @@ export function useStaffWelcome(): {
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [facilityName, setFacilityName] = useState('')
+  const [facilityId, setFacilityId] = useState('')
   const [accessLevel, setAccessLevel] = useState('')
   const [profilePhotoUrl, setProfilePhotoUrl] = useState('')
 
@@ -65,6 +67,8 @@ export function useStaffWelcome(): {
             staff && typeof staff.email === 'string' ? staff.email : ''
           const facility =
             staff && typeof staff.facilityName === 'string' ? staff.facilityName : ''
+          const facId =
+            staff && typeof staff.facilityId === 'string' ? staff.facilityId.trim() : ''
           const access =
             staff && typeof staff.accessLevel === 'string' ? staff.accessLevel : ''
           const photo =
@@ -79,6 +83,7 @@ export function useStaffWelcome(): {
           setDisplayName(name)
           setEmail(fullEmail)
           setFacilityName(facility)
+          setFacilityId(facId)
           setAccessLevel(access)
           setProfilePhotoUrl(photo)
           setLoading(false)
@@ -90,6 +95,7 @@ export function useStaffWelcome(): {
           setDisplayName(fallback)
           setEmail(user.email ?? '')
           setFacilityName('')
+          setFacilityId('')
           setAccessLevel('')
           setProfilePhotoUrl('')
           setLoading(false)
@@ -110,6 +116,7 @@ export function useStaffWelcome(): {
     displayName,
     email,
     facilityName,
+    facilityId,
     accessLevel,
     profilePhotoUrl,
   }

@@ -4,6 +4,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
+/// Copies geocoded home coords onto [alerts] for staff maps (from `users` doc).
+Map<String, dynamic> _motherHomeGeoFields(Map<String, dynamic>? data) {
+  if (data == null) return <String, dynamic>{};
+  final lat = data['homeLatitude'];
+  final lng = data['homeLongitude'];
+  if (lat is num && lng is num) {
+    return <String, dynamic>{
+      'motherHomeLat': lat.toDouble(),
+      'motherHomeLng': lng.toDouble(),
+    };
+  }
+  return <String, dynamic>{};
+}
+
 /// Handles PPD screening submissions (audio + text) and Red Flag / check-in reports.
 class CheckInService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -148,6 +162,7 @@ class CheckInService {
         },
         'createdAt': now,
         'updatedAt': now,
+        ..._motherHomeGeoFields(data),
       });
     }
   }
@@ -196,6 +211,7 @@ class CheckInService {
         },
         'createdAt': now,
         'updatedAt': now,
+        ..._motherHomeGeoFields(data),
       });
     }
   }

@@ -461,6 +461,11 @@
   gap: 20px;
 }
 
+/* Lets the Red-flag table use table-fixed without forcing horizontal scroll */
+.tsa-escalation-left {
+  min-width: 0;
+}
+
 .tsa-escalation-metrics {
   display: flex;
   flex-direction: row;
@@ -501,6 +506,23 @@
   border-top: 1px solid #e5e7eb;
   font-size: 13px;
   align-items: center;
+}
+
+.tsa-patient-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tsa-patient-name {
+  font-weight: 600;
+  color: #111827;
+}
+
+.tsa-patient-sub {
+  font-size: 11px;
+  color: #6b7280;
 }
 
 .tsa-escalation-right .tsa-reroute-card,
@@ -604,7 +626,8 @@
 }
 
 .tsa-escalation-map-wrap {
-  height: 150px;
+  position: relative;
+  height: 220px;
   border-radius: 12px;
   overflow: hidden;
   background: #e5e7eb;
@@ -1115,6 +1138,17 @@
   align-items: flex-start;
 }
 
+/* Full track record: one column so cards stack with even spacing (not a 2-col masonry grid). */
+.tsa-main--patient-record {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 52rem;
+}
+
+.tsa-main--patient-record > * {
+  width: 100%;
+  min-width: 0;
+}
+
 .tsa-patient-detail-left,
 .tsa-patient-detail-right {
   display: flex;
@@ -1124,27 +1158,42 @@
 
 .tsa-patient-detail-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 16px;
   margin-bottom: 16px;
 }
 
 .tsa-patient-detail-identity {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.tsa-patient-detail-text {
+  flex: 1;
+  min-width: 0;
 }
 
 .tsa-patient-avatar-circle {
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  box-sizing: border-box;
   background-color: #e0f2fe;
   color: #1d4ed8;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
+  font-size: 18px;
+  line-height: 1;
 }
 
 .tsa-patient-detail-name {
@@ -1155,6 +1204,11 @@
 .tsa-patient-detail-meta {
   font-size: 12px;
   color: #6b7280;
+  line-height: 1.45;
+}
+
+.tsa-patient-detail-meta + .tsa-patient-detail-meta {
+  margin-top: 4px;
 }
 
 .tsa-patient-risk-pill {
@@ -1165,16 +1219,6 @@
   color: #92400e;
   font-size: 11px;
   font-weight: 600;
-}
-
-.tsa-patient-detail-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.tsa-primary-button--status {
-  width: auto;
-  padding-inline: 16px;
 }
 
 .tsa-patient-detail-metrics {
@@ -1385,6 +1429,26 @@
 .tsa-emergency-phone {
   margin-top: 2px;
   opacity: 0.9;
+}
+
+.tsa-emergency-address {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #ffffff;
+  line-height: 1.45;
+  opacity: 0.95;
+}
+
+.tsa-emergency-address-label {
+  font-weight: 600;
+  color: #ffffff;
+  opacity: 1;
+}
+
+.tsa-emergency-address-empty {
+  margin-top: 8px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .tsa-primary-button--quickcall {

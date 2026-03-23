@@ -317,11 +317,15 @@ class _EpdsQuestionnaireScreenState extends State<EpdsQuestionnaireScreen> {
     final riskLevel = _computeRiskLevel(totalScore);
 
     final answers = _questions
-        .map((q) => {
-              'id': q.id,
-              'text': q.text,
-              'score': _selectedScores[q.id],
-            })
+        .map((q) {
+          final s = _selectedScores[q.id];
+          return {
+            'id': q.id,
+            'text': q.text,
+            'score': s,
+            'selectedLabel': _selectedOptionLabelFor(q, s),
+          };
+        })
         .toList();
 
     setState(() {
@@ -360,6 +364,15 @@ class _EpdsQuestionnaireScreenState extends State<EpdsQuestionnaireScreen> {
     if (totalScore >= 13) return 'high';
     if (totalScore >= 10) return 'medium';
     return 'low';
+  }
+
+  /// Wording the patient actually tapped (for staff / TSA — score alone is ambiguous).
+  String? _selectedOptionLabelFor(_EpdsQuestion q, int? score) {
+    if (score == null) return null;
+    for (final o in q.options) {
+      if (o.score == score) return o.text;
+    }
+    return null;
   }
 }
 

@@ -40,7 +40,6 @@ class _CheckInScreenState extends State<CheckInScreen> {
 
   final AudioRecorder _recorder = AudioRecorder();
   bool _isListening = false;
-  String? _currentRecordingPath;
   String? _currentRecordingQuestionId;
   final Map<String, String> _epdsAudioPaths = {};
   bool _isSavingPpd = false;
@@ -126,14 +125,13 @@ class _CheckInScreenState extends State<CheckInScreen> {
 
   Future<void> _toggleListening() async {
     if (_isListening) {
-      await _recorder.stop();
+      final savedPath = await _recorder.stop();
       setState(() {
-        if (_currentRecordingPath != null &&
+        if (savedPath != null &&
+            savedPath.isNotEmpty &&
             _currentRecordingQuestionId != null) {
-          _epdsAudioPaths[_currentRecordingQuestionId!] =
-              _currentRecordingPath!;
+          _epdsAudioPaths[_currentRecordingQuestionId!] = savedPath;
         }
-        _currentRecordingPath = null;
         _currentRecordingQuestionId = null;
         _isListening = false;
       });
@@ -152,9 +150,16 @@ class _CheckInScreenState extends State<CheckInScreen> {
       final dir = await getTemporaryDirectory();
       final path =
           '${dir.path}/ppd_${questionId}_${DateTime.now().millisecondsSinceEpoch}.m4a';
-      await _recorder.start(const RecordConfig(encoder: AudioEncoder.aacLc), path: path);
+      await _recorder.start(
+        const RecordConfig(
+          encoder: AudioEncoder.aacLc,
+          bitRate: 128000,
+          sampleRate: 44100,
+          numChannels: 1,
+        ),
+        path: path,
+      );
       setState(() {
-        _currentRecordingPath = path;
         _currentRecordingQuestionId = questionId;
         _isListening = true;
       });
@@ -201,6 +206,10 @@ class _CheckInScreenState extends State<CheckInScreen> {
 
     // All questions answered, submit full screening
     if (_isSavingPpd) return;
+    // Ensure any active recording is finalized before collecting audio files.
+    if (_isListening) {
+      await _toggleListening();
+    }
     setState(() => _isSavingPpd = true);
 
     try {
@@ -216,6 +225,11 @@ class _CheckInScreenState extends State<CheckInScreen> {
                 'text': _localizedEpdsText(q.id, _epdsLanguage),
                 'score': _epdsSelectedScores[q.id],
                 'answerText': _epdsAnswerTexts[q.id],
+                'selectedLabel': _epdsAnswerSelectedLabel(
+                  q,
+                  _epdsSelectedScores[q.id],
+                  _epdsLanguage,
+                ),
               })
           .toList();
 
@@ -224,6 +238,9 @@ class _CheckInScreenState extends State<CheckInScreen> {
       for (final entry in _epdsAudioPaths.entries) {
         final file = File(entry.value);
         if (await file.exists()) {
+          final bytes = await file.length();
+          // Ignore empty/near-empty captures (often mic permission/device glitches).
+          if (bytes < 1024) continue;
           questionAudioFiles[entry.key] = file;
         }
       }
@@ -885,6 +902,20 @@ String _localizedEpdsOptionText(
   final byEnglish = byQuestion[englishText];
   if (byEnglish == null) return '';
   return byEnglish[language] ?? '';
+}
+
+/// Text of the option the patient chose (for TSA). English + local line when applicable.
+String _epdsAnswerSelectedLabel(_EpdsQuestion q, int? score, String language) {
+  if (score == null) return '';
+  for (final o in q.options) {
+    if (o.score != score) continue;
+    final en = o.text;
+    if (language == 'en') return en;
+    final loc = _localizedEpdsOptionText(q.id, en, language);
+    if (loc.isNotEmpty) return '$loc — $en';
+    return en;
+  }
+  return '';
 }
 
 const Map<String, Map<String, Map<String, String>>> _epdsOptionTranslations = {

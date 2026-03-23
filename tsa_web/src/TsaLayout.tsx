@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import type { TsaPage } from './App'
-import { BellIcon } from './TopIcons'
+import { AlertHistoryIcon } from './TopIcons'
 import { useStaffWelcome } from './useStaffWelcome'
 import { signOut } from 'firebase/auth'
 import { auth } from './firebase'
@@ -8,19 +8,35 @@ import { auth } from './firebase'
 /** Which area of the app is primary — drives sidebar highlights and Patient Details state. */
 export type TsaNavContext =
   | 'live'
+  | 'alertHistory'
   | 'escalations'
   | 'patientDetail'
-  | 'notifications'
+  | 'patientEpds'
+  | 'patientRecord'
   | 'caseDetail'
   | 'profile'
+
+/** Live Feed: binds the top-bar search to the patient table filter. Other pages omit this. */
+export type HeaderPatientSearchBinding = {
+  value: string
+  onChange: (next: string) => void
+  placeholder?: string
+}
 
 export interface TsaLayoutProps {
   children: React.ReactNode
   navContext: TsaNavContext
   onNavigate: (page: TsaPage) => void
+  /** When set (Live Feed only), the header search filters linked mothers. */
+  headerPatientSearch?: HeaderPatientSearchBinding
 }
 
-export const TsaLayout: React.FC<TsaLayoutProps> = ({ children, navContext, onNavigate }) => {
+export const TsaLayout: React.FC<TsaLayoutProps> = ({
+  children,
+  navContext,
+  onNavigate,
+  headerPatientSearch,
+}) => {
   const {
     welcomeLabel,
     initials,
@@ -35,15 +51,22 @@ export const TsaLayout: React.FC<TsaLayoutProps> = ({ children, navContext, onNa
 
   const liveActive = navContext === 'live'
   const escalationsActive = navContext === 'escalations' || navContext === 'caseDetail'
-  const patientActive = navContext === 'patientDetail' || navContext === 'caseDetail'
+  const patientActive =
+    navContext === 'patientDetail' || navContext === 'patientRecord' || navContext === 'caseDetail'
   const patientDisabled =
     navContext === 'live' ||
+    navContext === 'alertHistory' ||
     navContext === 'escalations' ||
-    navContext === 'notifications' ||
     navContext === 'caseDetail' ||
     navContext === 'profile'
-  const notificationsPageActive = navContext === 'notifications'
+  const alertHistoryPageActive = navContext === 'alertHistory'
   const profilePageActive = navContext === 'profile'
+
+  /** No top-bar search on single-patient views (case summary + full track record). */
+  const hideHeaderPatientSearch =
+    navContext === 'patientDetail' ||
+    navContext === 'patientEpds' ||
+    navContext === 'patientRecord'
 
   const navBtn = (active: boolean, extra = '') =>
     `w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium transition ${
@@ -83,7 +106,7 @@ export const TsaLayout: React.FC<TsaLayoutProps> = ({ children, navContext, onNa
             onClick={() => onNavigate('patientDetail')}
             title={
               patientDisabled
-                ? 'Open a patient from Live Feed to view details'
+                ? 'Open a patient from Live Feed or Alert history to view details'
                 : undefined
             }
           >
@@ -111,29 +134,49 @@ export const TsaLayout: React.FC<TsaLayoutProps> = ({ children, navContext, onNa
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
-        <header className="h-14 shrink-0 z-10 bg-white border-b border-slate-200 flex items-center gap-4 px-6">
-          <p className="text-sm text-slate-800 font-medium truncate min-w-0">
+        <header className="h-14 shrink-0 z-10 bg-white border-b border-slate-200 flex items-center gap-4 px-6 min-w-0">
+          <p className="text-sm text-slate-800 font-medium truncate min-w-0 shrink-0 max-w-[min(100%,14rem)] sm:max-w-xs">
             {loading ? <span className="text-slate-400">Welcome…</span> : welcomeLabel}
           </p>
-          <div className="flex items-center gap-3 ml-auto shrink-0">
-            <input
-              type="search"
-              placeholder="Search Patient ID or Name"
-              aria-label="Search Patient ID or Name"
-              className="w-56 md:w-64 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-tsa-accent-blue/40"
-            />
+          <div className="flex flex-1 min-w-0 items-center justify-end gap-2 sm:gap-3">
+            {headerPatientSearch ? (
+              <input
+                type="search"
+                id="tsa-header-patient-search"
+                autoComplete="off"
+                value={headerPatientSearch.value}
+                onChange={(e) => headerPatientSearch.onChange(e.target.value)}
+                placeholder={
+                  headerPatientSearch.placeholder ??
+                  'Search by name, Ghana Card ID, or NHIS…'
+                }
+                aria-label="Search patients by name, Ghana Card ID, or NHIS number"
+                className="min-w-0 w-[min(100%,11rem)] sm:w-48 md:w-56 lg:w-72 max-w-full px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-tsa-accent-blue/40"
+              />
+            ) : hideHeaderPatientSearch ? null : (
+              <input
+                type="search"
+                disabled
+                placeholder="Search on Live Feed for patients"
+                aria-label="Patient search is available on the Live Feed page"
+                title="Open Live Feed to search by name, Ghana Card ID, or NHIS"
+                className="min-w-0 w-[min(100%,11rem)] sm:w-48 md:w-56 lg:w-64 max-w-full px-3 py-1.5 rounded-full border border-slate-200 bg-slate-100 text-xs text-slate-500 placeholder:text-slate-400 cursor-not-allowed opacity-80"
+              />
+            )}
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               type="button"
               className={`w-9 h-9 rounded-full flex items-center justify-center transition ${
-                notificationsPageActive
+                alertHistoryPageActive
                   ? 'bg-tsa-accent-blue text-white'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
-              aria-label="Notifications"
-              aria-current={notificationsPageActive ? 'page' : undefined}
-              onClick={() => onNavigate('notifications')}
+              aria-label="Alert history — all facility alerts and types"
+              aria-current={alertHistoryPageActive ? 'page' : undefined}
+              title="Alert history"
+              onClick={() => onNavigate('alertHistory')}
             >
-              <BellIcon />
+              <AlertHistoryIcon />
             </button>
             <button
               type="button"
@@ -176,6 +219,7 @@ export const TsaLayout: React.FC<TsaLayoutProps> = ({ children, navContext, onNa
                 <span className="text-xs font-semibold">{initials}</span>
               )}
             </button>
+            </div>
           </div>
         </header>
 

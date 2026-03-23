@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'mother_profile.dart';
 import 'facility_linkage_screen.dart';
+import 'user_home_geo_service.dart';
 import 'widgets/app_toast.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -25,9 +26,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late final TextEditingController _emailController;
   late final TextEditingController _phoneController;
   late final TextEditingController _ghanaCardController;
+  late final TextEditingController _nhisIdController;
   late final TextEditingController _hospitalController;
   late final TextEditingController _primaryLanguageController;
   late final TextEditingController _dateOfBirthController;
+  late final TextEditingController _homeAddressController;
 
   final List<String> _ghanaLanguages = const [
     'English',
@@ -53,12 +56,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _emailController = TextEditingController(text: widget.profile.email);
     _phoneController = TextEditingController(text: widget.profile.phoneNumber);
     _ghanaCardController = TextEditingController(text: widget.profile.ghanaCardId);
+    _nhisIdController = TextEditingController(text: widget.profile.nhisId);
     _hospitalController =
         TextEditingController(text: widget.profile.linkedHospitalName);
     _primaryLanguageController =
         TextEditingController(text: widget.profile.primaryLanguage);
     _dateOfBirthController =
         TextEditingController(text: widget.profile.dateOfBirth);
+    _homeAddressController =
+        TextEditingController(text: widget.profile.homeAddress);
 
     if (widget.profile.primaryLanguage.isNotEmpty &&
         _ghanaLanguages.contains(widget.profile.primaryLanguage)) {
@@ -72,9 +78,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _emailController.dispose();
     _phoneController.dispose();
     _ghanaCardController.dispose();
+    _nhisIdController.dispose();
     _hospitalController.dispose();
     _primaryLanguageController.dispose();
     _dateOfBirthController.dispose();
+    _homeAddressController.dispose();
     super.dispose();
   }
 
@@ -101,9 +109,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       email: _emailController.text.trim(),
       phoneNumber: _phoneController.text.trim(),
       ghanaCardId: _ghanaCardController.text.trim(),
+      nhisId: _nhisIdController.text.trim(),
       linkedHospitalName: _hospitalController.text.trim(),
       primaryLanguage: _primaryLanguageController.text.trim(),
       dateOfBirth: _dateOfBirthController.text.trim(),
+      homeAddress: _homeAddressController.text.trim(),
     );
 
     try {
@@ -113,6 +123,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         return;
       }
 
+      // One Firestore write: profile + geocode fields (always sets homeGeoStatus when relevant).
+      final geoPatch = await UserHomeGeoService.buildGeoPatch(
+        updatedProfile.homeAddress,
+      );
       await FirebaseFirestore.instance
           .collection('users')
           .doc(currentUser.uid)
@@ -121,13 +135,33 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'email': updatedProfile.email,
         'phone': updatedProfile.phoneNumber,
         'ghanaCardId': updatedProfile.ghanaCardId,
+        'NhisId': updatedProfile.nhisId,
         'primaryLanguage': updatedProfile.primaryLanguage,
         'dateOfBirth': updatedProfile.dateOfBirth,
+        'homeAddress': updatedProfile.homeAddress,
         // Keep facility name in sync with whatever is linked in Facility Linkage.
         'linkedFacilityName': updatedProfile.linkedHospitalName,
         'updatedAt': FieldValue.serverTimestamp(),
+        ...geoPatch.fields,
       });
 
+      final geoOutcome = geoPatch.outcome;
+      if (!mounted) return;
+      if (geoOutcome == HomeGeoSyncOutcome.ok &&
+          updatedProfile.homeAddress.isNotEmpty) {
+        showAppToast(
+          'Profile saved. Home location saved for the facility map.',
+        );
+      } else if (geoOutcome == HomeGeoSyncOutcome.failed &&
+          updatedProfile.homeAddress.isNotEmpty) {
+        showAppToast(
+          'Profile saved. Map couldn’t find this address — check Firestore for homeGeoError, or add more detail.',
+        );
+      } else if (geoOutcome == HomeGeoSyncOutcome.cleared) {
+        showAppToast('Profile saved. Home address removed from map.');
+      }
+
+      if (!mounted) return;
       Navigator.of(context).pop<MotherProfile>(updatedProfile);
     } catch (_) {
       showAppToast('Unable to save your profile. Please try again.');
@@ -254,6 +288,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     return null;
                   },
                 ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _homeAddressController,
+                  keyboardType: TextInputType.streetAddress,
+                  textCapitalization: TextCapitalization.sentences,
+                  maxLines: 3,
+                  decoration: _fieldDecoration(
+                    'Home address (optional)',
+                    hint: 'For urgent / severe alert follow-up only',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Optional. Shared only with your linked facility if you choose to add it.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
                 const SizedBox(height: 24),
                 Text(
                   'Clinical details',
@@ -270,6 +323,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Please enter your Ghana Card number';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _nhisIdController,
+                  decoration: _fieldDecoration('NHIS number'),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter your NHIS number';
                     }
                     return null;
                   },

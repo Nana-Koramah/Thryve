@@ -3,9 +3,11 @@ import './dashboard.css'
 import type { TsaPage } from './App'
 import { TsaLayout } from './TsaLayout'
 
-export const RedFlagDetailPage: React.FC<{ onNavigate: (page: TsaPage) => void }> = ({
-  onNavigate,
-}) => {
+export const RedFlagDetailPage: React.FC<{
+  onNavigate: (page: TsaPage) => void
+  /** Firestore `alerts` document id when opened from Red-flag Alerts. */
+  alertId: string | null
+}> = ({ onNavigate, alertId }) => {
   return (
     <TsaLayout navContext="caseDetail" onNavigate={onNavigate}>
       <main className="tsa-main tsa-main--detail">
@@ -16,6 +18,13 @@ export const RedFlagDetailPage: React.FC<{ onNavigate: (page: TsaPage) => void }
           >
             ← Back to escalations
           </button>
+
+          {alertId ? (
+            <p className="text-xs text-slate-600 bg-slate-100 rounded-lg px-3 py-2 mb-3">
+              Case linked to alert <span className="font-mono">{alertId}</span>. Full Firestore
+              detail UI is the next step — below is still placeholder content.
+            </p>
+          ) : null}
 
           <section className="tsa-card tsa-detail-card tsa-detail-card--symptoms">
             <div className="tsa-detail-header-row">
