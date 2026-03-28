@@ -2,7 +2,7 @@
 
 Thryve is a bi-directional mHealth system for postnatal care in Ghana. It links **mothers** to **healthcare facilities** in real time so facilities can see check-ins, EPDS (PPD) screenings, meal logs, and red-flag alerts, while staff document care in **clinical notes** and **referrals**.
 
-The project addresses gaps in postnatal follow-up—especially early detection of complications and postpartum depression—by combining a **mobile app** for mothers with a **web dashboard** for hospital staff (TSA: Thryve System Analytics).
+The project addresses gaps in postnatal follow-up especially early detection of complications and postpartum depression by combining a **mobile app** for mothers with a **web dashboard** for hospital staff (TSA: Thryve System Analytics).
 
 ---
 
@@ -10,8 +10,8 @@ The project addresses gaps in postnatal follow-up—especially early detection o
 
 | Path | Description |
 |------|-------------|
-| `thryve_mobile/` | **Mother’s app** — Flutter (Android-focused; iOS/macOS/Linux targets also present) |
-| `tsa_web/` | **Staff dashboard** — React + TypeScript + Vite + Tailwind CSS |
+| `thryve_mobile/` | **Mother’s app**  Flutter (Android-focused; iOS/macOS/Linux targets also present) |
+| `tsa_web/` | **Staff dashboard** React + TypeScript + Vite + Tailwind CSS |
 | `firestore.rules` | Firestore security rules |
 | `storage.rules` | Firebase Storage security rules |
 | `firestore.indexes.json` | Firestore composite indexes |
