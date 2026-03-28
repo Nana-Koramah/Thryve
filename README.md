@@ -178,5 +178,4 @@ Detailed backend steps: **`BACKEND_CHECKLIST.md`**.
 
 This project is licensed under the [MIT License](LICENSE). Copyright Thryve **Nana Koramah Abeasi** (2026).
 
-`thryve_mobile` is marked `publish_to: 'none'` in `pubspec.yaml` so it is not published to pub.dev; that does not change the MIT terms for this repository.
 
