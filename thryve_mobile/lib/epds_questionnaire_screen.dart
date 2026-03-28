@@ -77,10 +77,7 @@ class _EpdsQuestionnaireScreenState extends State<EpdsQuestionnaireScreen> {
           'Yes, most of the time I haven’t been able to cope at all',
           3,
         ),
-        _EpdsOption(
-          'Yes, sometimes I haven’t been coping as well as usual',
-          2,
-        ),
+        _EpdsOption('Yes, sometimes I haven’t been coping as well as usual', 2),
         _EpdsOption('No, most of the time I have coped quite well', 1),
         _EpdsOption('No, I have been coping as well as ever', 0),
       ],
@@ -148,10 +145,7 @@ class _EpdsQuestionnaireScreenState extends State<EpdsQuestionnaireScreen> {
         elevation: 0,
         title: const Text(
           'PPD Questionnaire',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -163,10 +157,7 @@ class _EpdsQuestionnaireScreenState extends State<EpdsQuestionnaireScreen> {
             children: [
               Text(
                 'Question ${_currentIndex + 1} of $totalQuestions',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey.shade700,
-                ),
+                style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
               ),
               const SizedBox(height: 8),
               LinearProgressIndicator(
@@ -187,7 +178,7 @@ class _EpdsQuestionnaireScreenState extends State<EpdsQuestionnaireScreen> {
               Expanded(
                 child: ListView.separated(
                   itemCount: question.options.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
                   itemBuilder: (context, index) {
                     final option = question.options[index];
                     final isSelected = selectedScore == option.score;
@@ -312,21 +303,21 @@ class _EpdsQuestionnaireScreenState extends State<EpdsQuestionnaireScreen> {
     }
 
     // All questions answered, submit
-    final totalScore =
-        _selectedScores.values.fold<int>(0, (sum, value) => sum + value);
+    final totalScore = _selectedScores.values.fold<int>(
+      0,
+      (sum, value) => sum + value,
+    );
     final riskLevel = _computeRiskLevel(totalScore);
 
-    final answers = _questions
-        .map((q) {
-          final s = _selectedScores[q.id];
-          return {
-            'id': q.id,
-            'text': q.text,
-            'score': s,
-            'selectedLabel': _selectedOptionLabelFor(q, s),
-          };
-        })
-        .toList();
+    final answers = _questions.map((q) {
+      final s = _selectedScores[q.id];
+      return {
+        'id': q.id,
+        'text': q.text,
+        'score': s,
+        'selectedLabel': _selectedOptionLabelFor(q, s),
+      };
+    }).toList();
 
     setState(() {
       _isSubmitting = true;
@@ -340,9 +331,7 @@ class _EpdsQuestionnaireScreenState extends State<EpdsQuestionnaireScreen> {
         answers: answers,
       );
       if (mounted) {
-        showAppToast(
-          'Your PPD questionnaire has been sent to your care team.',
-        );
+        showAppToast('Your PPD questionnaire has been sent to your care team.');
         Navigator.of(context).pop();
       }
     } on CheckInException catch (e) {
@@ -394,4 +383,3 @@ class _EpdsOption {
   final String text;
   final int score;
 }
-

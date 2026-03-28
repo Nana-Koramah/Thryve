@@ -44,7 +44,7 @@ class _SignInScreenState extends State<SignInScreen> {
       final isEmailLike = rawIdentifier.contains('@');
       final loginEmail = isEmailLike
           ? rawIdentifier
-          : '${rawIdentifier}@phone.thryve';
+          : '$rawIdentifier@phone.thryve';
 
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: loginEmail,
@@ -58,9 +58,7 @@ class _SignInScreenState extends State<SignInScreen> {
       });
 
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const DashboardScreen(),
-        ),
+        MaterialPageRoute(builder: (context) => const DashboardScreen()),
       );
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
@@ -95,9 +93,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   void _onGoToSignUp() {
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const SignUpStepOneScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const SignUpStepOneScreen()),
     );
   }
 
@@ -138,10 +134,7 @@ class _SignInScreenState extends State<SignInScreen> {
               const SizedBox(height: 8),
               Text(
                 'Sign in to continue your postpartum care journey.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade700,
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
               ),
               const SizedBox(height: 24),
               Expanded(
@@ -161,8 +154,9 @@ class _SignInScreenState extends State<SignInScreen> {
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _identifierController,
-                          decoration:
-                              _fieldDecoration('Enter email or phone number'),
+                          decoration: _fieldDecoration(
+                            'Enter email or phone number',
+                          ),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
                               return 'Please enter your email or phone number';
@@ -201,9 +195,7 @@ class _SignInScreenState extends State<SignInScreen> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(24),
                               ),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 14,
-                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
                             ),
                             child: _isSubmitting
                                 ? const SizedBox(
@@ -211,9 +203,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                     width: 20,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      valueColor:
-                                          AlwaysStoppedAnimation<Color>(
-                                              Colors.white),
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
                                     ),
                                   )
                                 : const Text(
@@ -229,13 +221,12 @@ class _SignInScreenState extends State<SignInScreen> {
                         Row(
                           children: [
                             Expanded(
-                              child: Divider(
-                                color: Colors.grey.shade300,
-                              ),
+                              child: Divider(color: Colors.grey.shade300),
                             ),
                             Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
                               child: Text(
                                 'or continue with',
                                 style: TextStyle(
@@ -245,9 +236,7 @@ class _SignInScreenState extends State<SignInScreen> {
                               ),
                             ),
                             Expanded(
-                              child: Divider(
-                                color: Colors.grey.shade300,
-                              ),
+                              child: Divider(color: Colors.grey.shade300),
                             ),
                           ],
                         ),
@@ -318,9 +307,7 @@ class _SignInScreenState extends State<SignInScreen> {
                             child: RichText(
                               text: TextSpan(
                                 text: "Don't have an account? ",
-                                style: TextStyle(
-                                  color: Colors.grey.shade700,
-                                ),
+                                style: TextStyle(color: Colors.grey.shade700),
                                 children: [
                                   TextSpan(
                                     text: 'Sign Up',
@@ -347,4 +334,3 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 }
-

@@ -8,10 +8,7 @@ import 'user_home_geo_service.dart';
 import 'widgets/app_toast.dart';
 
 class EditProfileScreen extends StatefulWidget {
-  const EditProfileScreen({
-    super.key,
-    required this.profile,
-  });
+  const EditProfileScreen({super.key, required this.profile});
 
   final MotherProfile profile;
 
@@ -55,16 +52,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _nameController = TextEditingController(text: widget.profile.fullName);
     _emailController = TextEditingController(text: widget.profile.email);
     _phoneController = TextEditingController(text: widget.profile.phoneNumber);
-    _ghanaCardController = TextEditingController(text: widget.profile.ghanaCardId);
+    _ghanaCardController = TextEditingController(
+      text: widget.profile.ghanaCardId,
+    );
     _nhisIdController = TextEditingController(text: widget.profile.nhisId);
-    _hospitalController =
-        TextEditingController(text: widget.profile.linkedHospitalName);
-    _primaryLanguageController =
-        TextEditingController(text: widget.profile.primaryLanguage);
-    _dateOfBirthController =
-        TextEditingController(text: widget.profile.dateOfBirth);
-    _homeAddressController =
-        TextEditingController(text: widget.profile.homeAddress);
+    _hospitalController = TextEditingController(
+      text: widget.profile.linkedHospitalName,
+    );
+    _primaryLanguageController = TextEditingController(
+      text: widget.profile.primaryLanguage,
+    );
+    _dateOfBirthController = TextEditingController(
+      text: widget.profile.dateOfBirth,
+    );
+    _homeAddressController = TextEditingController(
+      text: widget.profile.homeAddress,
+    );
 
     if (widget.profile.primaryLanguage.isNotEmpty &&
         _ghanaLanguages.contains(widget.profile.primaryLanguage)) {
@@ -96,8 +99,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide.none,
       ),
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
   }
 
@@ -131,19 +133,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           .collection('users')
           .doc(currentUser.uid)
           .update({
-        'fullName': updatedProfile.fullName,
-        'email': updatedProfile.email,
-        'phone': updatedProfile.phoneNumber,
-        'ghanaCardId': updatedProfile.ghanaCardId,
-        'NhisId': updatedProfile.nhisId,
-        'primaryLanguage': updatedProfile.primaryLanguage,
-        'dateOfBirth': updatedProfile.dateOfBirth,
-        'homeAddress': updatedProfile.homeAddress,
-        // Keep facility name in sync with whatever is linked in Facility Linkage.
-        'linkedFacilityName': updatedProfile.linkedHospitalName,
-        'updatedAt': FieldValue.serverTimestamp(),
-        ...geoPatch.fields,
-      });
+            'fullName': updatedProfile.fullName,
+            'email': updatedProfile.email,
+            'phone': updatedProfile.phoneNumber,
+            'ghanaCardId': updatedProfile.ghanaCardId,
+            'NhisId': updatedProfile.nhisId,
+            'primaryLanguage': updatedProfile.primaryLanguage,
+            'dateOfBirth': updatedProfile.dateOfBirth,
+            'homeAddress': updatedProfile.homeAddress,
+            // Keep facility name in sync with whatever is linked in Facility Linkage.
+            'linkedFacilityName': updatedProfile.linkedHospitalName,
+            'updatedAt': FieldValue.serverTimestamp(),
+            ...geoPatch.fields,
+          });
 
       final geoOutcome = geoPatch.outcome;
       if (!mounted) return;
@@ -169,11 +171,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _onChangeFacility() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => const FacilityLinkageScreen(),
-      ),
-    );
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const FacilityLinkageScreen()));
 
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
@@ -228,10 +228,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         iconTheme: const IconThemeData(color: Colors.white),
         title: const Text(
           'Edit Profile',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-          ),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
         ),
         centerTitle: true,
       ),
@@ -302,10 +299,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'Optional. Shared only with your linked facility if you choose to add it.',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                 ),
                 const SizedBox(height: 24),
                 Text(
@@ -350,7 +344,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: _selectedLanguage,
+                  initialValue: _selectedLanguage,
                   decoration: _fieldDecoration('Primary Language'),
                   items: _ghanaLanguages
                       .map(
@@ -377,12 +371,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 TextFormField(
                   controller: _dateOfBirthController,
                   readOnly: true,
-                  decoration: _fieldDecoration(
-                    'Date of Birth',
-                    hint: 'DD/MM/YYYY',
-                  ).copyWith(
-                    suffixIcon: const Icon(Icons.calendar_today_rounded),
-                  ),
+                  decoration:
+                      _fieldDecoration(
+                        'Date of Birth',
+                        hint: 'DD/MM/YYYY',
+                      ).copyWith(
+                        suffixIcon: const Icon(Icons.calendar_today_rounded),
+                      ),
                   onTap: _pickDateOfBirth,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -422,4 +417,3 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 }
-
